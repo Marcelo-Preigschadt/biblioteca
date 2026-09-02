@@ -2,29 +2,19 @@
 
 Sistema estático para cadastro de leitores, consulta do acervo e controle de empréstimos. O frontend funciona no GitHub Pages e usa Supabase para autenticação e banco PostgreSQL.
 
-## 1. Criar e preparar o Supabase
+## 1. Preparar o Supabase
 
-1. Crie um projeto em <https://supabase.com/dashboard>.
-2. Abra **SQL Editor**, crie uma consulta e execute todo o conteúdo de [`supabase.sql`](supabase.sql).
-3. Em **Authentication → Providers → Email**, mantenha o provedor de e-mail ativado.
-4. Para usar o sistema sem configurar um servidor SMTP, desative **Confirm email**. Se a confirmação permanecer ativada, configure SMTP e os usuários precisarão confirmar o e-mail antes do primeiro acesso.
-5. Em **Integrations → Data API**, confirme:
+O banco já foi instalado no projeto `biblioteca` (`bpvkclssbaohjewcunji`). O arquivo [`supabase.sql`](supabase.sql) mantém o esquema completo versionado no repositório.
+
+1. Em **Authentication → Providers → Email**, mantenha o provedor de e-mail ativado.
+2. Para usar o sistema sem configurar um servidor SMTP, desative **Confirm email**. Se a confirmação permanecer ativada, configure SMTP e os usuários precisarão confirmar o e-mail antes do primeiro acesso.
+3. Em **Integrations → Data API**, confirme:
    - **Enable Data API**: ativado;
    - **Exposed schemas**: contém `public`.
 
 ## 2. Conectar o site ao projeto
 
-Em **Project Settings → API**, copie:
-
-- **Project URL**;
-- **Publishable key**. Em projetos antigos, use a chave `anon`.
-
-Abra `assets/js/config.js` e substitua os dois valores:
-
-```js
-export const SUPABASE_URL = "https://bpvkclssbaohjewcunji.supabase.co";
-export const SUPABASE_PUBLISHABLE_KEY = "SUA_CHAVE_PUBLICAVEL";
-```
+O arquivo [`assets/js/config.js`](assets/js/config.js) já contém a URL e a chave publicável do projeto `biblioteca`.
 
 Não use a **secret key** nem a chave **service_role** no site.
 
