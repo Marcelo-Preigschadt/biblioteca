@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Empréstimos da Biblioteca Escolar Vicente Dutra.">
+  <title>Empréstimos | Biblioteca Escolar</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="app-body" data-page="emprestimos">
+  <div class="app-layout">
+    <aside class="sidebar">
+      <a class="sidebar-logo" href="painel.html"><span class="brand-mark">📚</span><span><strong>Biblioteca</strong><small>Sistema escolar</small></span></a>
+      <span class="sidebar-label">MENU</span>
+      <nav class="sidebar-nav" aria-label="Menu principal">
+        <a href="painel.html"><span>⌂</span>Início</a>
+        <a href="acervo.html"><span>▤</span>Acervo</a>
+        <a class="active" href="emprestimos.html"><span>⇄</span>Empréstimos</a>
+      </nav>
+      <div class="admin-note" data-admin-only hidden><span>✦</span><div><strong>Modo administrador</strong><small>Gestão de empréstimos habilitada.</small></div></div>
+      <footer class="sidebar-footer"><span>Biblioteca Escolar</span><small>IEE Vicente Dutra</small></footer>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div><span class="eyebrow">CONTROLE</span><h1>Empréstimos</h1></div>
+        <div class="account-menu">
+          <button id="accountButton" class="account-button" type="button" aria-expanded="false"><span class="avatar">👤</span><span><strong data-user-name>Carregando...</strong><small data-user-role></small></span><span>⌄</span></button>
+          <div id="accountPanel" class="account-panel" hidden><strong data-user-name></strong><span data-user-email></span><span><b>Turma:</b> <span data-user-class></span></span><button class="button button-ghost button-block" data-logout type="button">Sair da conta</button></div>
+        </div>
+      </header>
+
+      <main class="content">
+        <div id="pageMessage" class="message" role="alert" hidden></div>
+        <section class="section-heading"><div><span class="eyebrow">BIBLIOTECA</span><h2 id="loansHeading">Meus empréstimos</h2><p class="muted">Consulte os livros emprestados e as datas de devolução.</p></div></section>
+        <section class="table-card">
+          <div class="table-toolbar">
+            <label class="search-field"><span>⌕</span><input id="loanSearch" type="search" placeholder="Pesquisar por livro ou leitor..." autocomplete="off"></label>
+            <select id="loanFilter" class="compact-select" aria-label="Filtrar empréstimos"><option value="ativos">Ativos</option><option value="todos">Todos</option><option value="devolvidos">Devolvidos</option><option value="atrasados">Atrasados</option></select>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Livro</th><th data-admin-only hidden>Leitor</th><th>Empréstimo</th><th>Devolução prevista</th><th>Status</th><th data-admin-only hidden>Ação</th></tr></thead>
+              <tbody id="loansTable"><tr><td colspan="6" class="empty-cell">Carregando empréstimos...</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>

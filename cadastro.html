@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Cadastro de leitores da Biblioteca Escolar Vicente Dutra.">
+  <title>Criar conta | Biblioteca Escolar</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="auth-body" data-page="cadastro">
+  <div class="auth-layout">
+    <section class="auth-brand" aria-label="Biblioteca Escolar">
+      <a class="auth-brand-logo" href="index.html">
+        <span class="brand-mark" aria-hidden="true">📚</span>
+        <span><strong>Biblioteca</strong><small>Sistema escolar</small></span>
+      </a>
+
+      <div class="auth-brand-copy">
+        <span class="eyebrow eyebrow-light">NOVO LEITOR</span>
+        <h1>Sua próxima história começa aqui.</h1>
+        <p>Crie uma conta para consultar o acervo e utilizar o sistema da biblioteca.</p>
+      </div>
+
+      <blockquote>“Cada livro abre uma porta para um lugar diferente.”</blockquote>
+    </section>
+
+    <main class="auth-form-area">
+      <section class="auth-card auth-card-wide" aria-labelledby="signup-title">
+        <div class="auth-mobile-logo" aria-hidden="true">📚</div>
+        <span class="eyebrow">CADASTRO</span>
+        <h2 id="signup-title">Criar conta</h2>
+        <p class="muted">Escolha seu perfil e preencha os dados.</p>
+
+        <div id="pageMessage" class="message" role="alert" hidden></div>
+
+        <form id="cadastroForm" class="form-stack">
+          <fieldset class="profile-choice">
+            <legend>Tipo de usuário</legend>
+            <label class="profile-option selected">
+              <input type="radio" name="tipo" value="aluno" checked>
+              <span aria-hidden="true">🎓</span>
+              <strong>Aluno</strong>
+            </label>
+            <label class="profile-option">
+              <input type="radio" name="tipo" value="professor">
+              <span aria-hidden="true">🧑‍🏫</span>
+              <strong>Professor</strong>
+            </label>
+          </fieldset>
+
+          <label class="field">
+            <span>Nome completo</span>
+            <input id="nome" name="nome" type="text" autocomplete="name" maxlength="120" placeholder="Digite seu nome" required>
+          </label>
+
+          <label class="field" id="turmaField">
+            <span>Turma</span>
+            <input id="turma" name="turma" type="text" maxlength="30" placeholder="Ex.: 301" required>
+          </label>
+
+          <label class="field">
+            <span>E-mail</span>
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="seuemail@exemplo.com" required>
+          </label>
+
+          <label class="field">
+            <span>Senha</span>
+            <span class="password-wrap">
+              <input id="senha" name="senha" type="password" autocomplete="new-password" minlength="6" placeholder="Mínimo de 6 caracteres" required>
+              <button class="password-toggle" type="button" data-password-toggle="senha" aria-label="Mostrar senha">Mostrar</button>
+            </span>
+          </label>
+
+          <button class="button button-primary button-block" type="submit">
+            <span class="button-label">Criar conta</span>
+            <span class="spinner" aria-hidden="true"></span>
+          </button>
+        </form>
+
+        <p class="auth-switch">Já possui conta? <a href="index.html">Entrar</a></p>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>

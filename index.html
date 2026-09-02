@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Acesso ao sistema da Biblioteca Escolar Vicente Dutra.">
+  <title>Entrar | Biblioteca Escolar</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="auth-body" data-page="login">
+  <div class="auth-layout">
+    <section class="auth-brand" aria-label="Biblioteca Escolar">
+      <a class="auth-brand-logo" href="index.html">
+        <span class="brand-mark" aria-hidden="true">📚</span>
+        <span><strong>Biblioteca</strong><small>Sistema escolar</small></span>
+      </a>
+
+      <div class="auth-brand-copy">
+        <span class="eyebrow eyebrow-light">BIBLIOTECA ESCOLAR</span>
+        <h1>Seu próximo livro começa aqui.</h1>
+        <p>Consulte o acervo e acompanhe seus empréstimos em um só lugar.</p>
+      </div>
+
+      <blockquote>“Um espaço para aproximar alunos, histórias e conhecimento.”</blockquote>
+    </section>
+
+    <main class="auth-form-area">
+      <section class="auth-card" aria-labelledby="login-title">
+        <div class="auth-mobile-logo" aria-hidden="true">📚</div>
+        <span class="eyebrow">ACESSO</span>
+        <h2 id="login-title">Bem-vindo de volta.</h2>
+        <p class="muted">Entre com seu e-mail e senha.</p>
+
+        <div id="pageMessage" class="message" role="alert" hidden></div>
+
+        <form id="loginForm" class="form-stack">
+          <label class="field">
+            <span>E-mail</span>
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="seuemail@exemplo.com" required autofocus>
+          </label>
+
+          <label class="field">
+            <span>Senha</span>
+            <span class="password-wrap">
+              <input id="senha" name="senha" type="password" autocomplete="current-password" placeholder="Digite sua senha" minlength="6" required>
+              <button class="password-toggle" type="button" data-password-toggle="senha" aria-label="Mostrar senha">Mostrar</button>
+            </span>
+          </label>
+
+          <button class="button button-primary button-block" type="submit">
+            <span class="button-label">Entrar</span>
+            <span class="spinner" aria-hidden="true"></span>
+          </button>
+        </form>
+
+        <p class="auth-switch">Ainda não tem conta? <a href="cadastro.html">Criar conta</a></p>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
