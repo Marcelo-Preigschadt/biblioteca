@@ -10,14 +10,16 @@
 <body class="app-body" data-page="acervo">
   <div class="app-layout">
     <aside class="sidebar">
-      <a class="sidebar-logo" href="painel.html"><span class="brand-mark" aria-hidden="true">📚</span><span><strong>Biblioteca</strong><small>Sistema escolar</small></span></a>
+      <a class="sidebar-logo" href="painel.html"><span class="brand-mark">📚</span><span><strong>Biblioteca</strong><small>Sistema escolar</small></span></a>
       <span class="sidebar-label">MENU</span>
       <nav class="sidebar-nav" aria-label="Menu principal">
-        <a href="painel.html"><span aria-hidden="true">⌂</span>Início</a>
-        <a class="active" href="acervo.html"><span aria-hidden="true">▤</span>Acervo</a>
-        <a href="emprestimos.html"><span aria-hidden="true">⇄</span>Empréstimos</a>
+        <a href="painel.html"><span>⌂</span>Início</a>
+        <a class="active" href="acervo.html"><span>▤</span>Acervo</a>
+        <a href="reservas.html"><span>⌛</span>Reservas</a>
+        <a href="emprestimos.html" data-staff-only hidden><span>⇄</span>Empréstimos</a>
+        <a href="usuarios.html" data-admin-only hidden><span>♟</span>Usuários</a>
       </nav>
-      <div class="admin-note" data-admin-only hidden><span aria-hidden="true">✦</span><div><strong>Modo administrador</strong><small>Gestão do acervo habilitada.</small></div></div>
+      <div class="admin-note" data-staff-only hidden><span>✦</span><div><strong>Gestão do acervo</strong><small>Cadastro, capas e empréstimos.</small></div></div>
       <footer class="sidebar-footer"><span>Biblioteca Escolar</span><small>IEE Vicente Dutra</small></footer>
     </aside>
 
@@ -33,35 +35,38 @@
       <main class="content">
         <div id="pageMessage" class="message" role="alert" hidden></div>
         <section class="section-heading section-heading-actions">
-          <div><span class="eyebrow">BIBLIOTECA</span><h2>Livros cadastrados</h2><p class="muted">Pesquise por título, autor ou categoria.</p></div>
-          <button id="openBookDialog" class="button button-primary" type="button" data-admin-only hidden>+ Cadastrar livro</button>
+          <div><span class="eyebrow">BIBLIOTECA</span><h2>Livros cadastrados</h2><p class="muted">Veja capas, resumos e disponibilidade.</p></div>
+          <button id="openBookDialog" class="button button-primary" type="button" data-staff-only hidden>+ Cadastrar livro</button>
         </section>
 
-        <section class="table-card">
-          <div class="table-toolbar">
-            <label class="search-field"><span aria-hidden="true">⌕</span><input id="bookSearch" type="search" placeholder="Pesquisar no acervo..." autocomplete="off"></label>
-            <span id="bookCount" class="result-count">Carregando...</span>
-          </div>
-          <div class="table-scroll">
-            <table>
-              <thead><tr><th>Livro</th><th>Categoria</th><th>Ano</th><th>Exemplares</th><th>Status</th><th data-admin-only hidden>Ações</th></tr></thead>
-              <tbody id="booksTable"><tr><td colspan="6" class="empty-cell">Carregando acervo...</td></tr></tbody>
-            </table>
-          </div>
+        <section class="catalog-toolbar">
+          <label class="search-field"><span>⌕</span><input id="bookSearch" type="search" placeholder="Pesquisar por título, autor ou categoria..." autocomplete="off"></label>
+          <span id="bookCount" class="result-count">Carregando...</span>
         </section>
+        <section id="booksGrid" class="catalog-grid" aria-live="polite"><div class="loading-state">Carregando acervo...</div></section>
       </main>
     </div>
   </div>
 
   <dialog id="bookDialog" class="dialog">
     <form id="bookForm" class="dialog-card">
-      <header><div><span class="eyebrow">NOVO ITEM</span><h2>Cadastrar livro</h2></div><button class="icon-button" type="button" data-close-dialog="bookDialog" aria-label="Fechar">×</button></header>
+      <header><div><span id="bookDialogEyebrow" class="eyebrow">NOVO ITEM</span><h2 id="bookDialogTitle">Cadastrar livro</h2></div><button class="icon-button" type="button" data-close-dialog="bookDialog" aria-label="Fechar">×</button></header>
+      <input name="id" type="hidden">
+      <input name="capa_atual" type="hidden">
       <div class="dialog-grid">
         <label class="field field-wide"><span>Título</span><input name="titulo" maxlength="180" required></label>
         <label class="field field-wide"><span>Autor</span><input name="autor" maxlength="160" required></label>
         <label class="field"><span>Categoria</span><input name="categoria" maxlength="80"></label>
         <label class="field"><span>Ano</span><input name="ano" type="number" min="0" max="2100"></label>
         <label class="field field-wide"><span>Quantidade de exemplares</span><input name="estoque_total" type="number" min="1" max="9999" value="1" required></label>
+        <label class="field field-wide"><span>Resumo do livro (opcional)</span><textarea name="resumo" maxlength="3000" rows="5" placeholder="Este campo já fica preparado para cadastrar a sinopse ou o resumo futuramente."></textarea></label>
+        <div class="field field-wide">
+          <span>Capa do livro (opcional)</span>
+          <div class="cover-upload">
+            <div class="cover-preview"><img id="coverPreviewImage" alt="Prévia da capa" hidden><span id="coverPreviewEmpty">📖</span></div>
+            <div><label class="button button-ghost" for="bookCover">Fotografar ou escolher imagem</label><input id="bookCover" class="visually-hidden" name="capa" type="file" accept="image/jpeg,image/png,image/webp" capture="environment"><small>JPG, PNG ou WebP, até 5 MB.</small><button id="removeCover" class="text-button" type="button">Remover capa</button></div>
+          </div>
+        </div>
       </div>
       <footer><button class="button button-ghost" type="button" data-close-dialog="bookDialog">Cancelar</button><button class="button button-primary" type="submit"><span class="button-label">Salvar livro</span><span class="spinner"></span></button></footer>
     </form>
@@ -72,7 +77,7 @@
       <header><div><span class="eyebrow">EMPRÉSTIMO</span><h2 id="loanBookTitle">Registrar empréstimo</h2></div><button class="icon-button" type="button" data-close-dialog="loanDialog" aria-label="Fechar">×</button></header>
       <input id="loanBookId" name="livro_id" type="hidden">
       <div class="dialog-grid">
-        <label class="field field-wide"><span>Aluno</span><select id="loanStudent" name="usuario_id" required><option value="">Selecione o aluno</option></select></label>
+        <label class="field field-wide"><span>Aluno ou professor</span><select id="loanReader" name="usuario_id" required><option value="">Selecione o leitor</option></select></label>
         <label class="field"><span>Data do empréstimo</span><input id="loanStart" name="data_emprestimo" type="date" required></label>
         <label class="field"><span>Prazo em dias</span><input id="loanDays" name="dias" type="number" min="1" max="365" value="7" required></label>
         <label class="field field-wide"><span>Devolução prevista</span><input id="loanDue" name="data_devolucao" type="date" readonly required></label>

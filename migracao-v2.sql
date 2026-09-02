@@ -1,70 +1,26 @@
--- Biblioteca Escolar Vicente Dutra
--- Instalação completa: perfis, acervo, empréstimos, reservas e capas.
+-- Atualiza o banco existente para bibliotecária, reservas, capas e resumo.
 
 begin;
 
-create schema if not exists private;
-
-create table if not exists public.perfis (
-  id uuid primary key references auth.users(id) on delete cascade,
-  nome text not null check (char_length(trim(nome)) between 2 and 120),
-  turma text,
-  tipo text not null default 'aluno' check (
-    tipo in ('aluno', 'professor', 'bibliotecaria', 'admin')
-  ),
-  email text not null unique,
-  criado_em timestamptz not null default now()
+alter table public.perfis drop constraint if exists perfis_tipo_check;
+alter table public.perfis add constraint perfis_tipo_check check (
+  tipo in ('aluno', 'professor', 'bibliotecaria', 'admin')
 );
 
-create table if not exists public.livros (
-  id bigint generated always as identity primary key,
-  titulo text not null check (char_length(trim(titulo)) between 1 and 180),
-  autor text not null check (char_length(trim(autor)) between 1 and 160),
-  categoria text,
-  ano smallint check (ano is null or ano between 0 and 2100),
-  resumo text,
-  capa_path text,
-  estoque_total integer not null default 1 check (estoque_total between 1 and 9999),
-  quantidade_emprestada integer not null default 0 check (
-    quantidade_emprestada >= 0 and quantidade_emprestada <= estoque_total
-  ),
-  criado_por uuid not null references public.perfis(id) on delete restrict,
-  criado_em timestamptz not null default now(),
-  atualizado_em timestamptz not null default now()
-);
-
-create table if not exists public.emprestimos (
-  id bigint generated always as identity primary key,
-  livro_id bigint not null references public.livros(id) on delete restrict,
-  usuario_id uuid not null references public.perfis(id) on delete restrict,
-  data_emprestimo date not null default current_date,
-  data_devolucao date not null,
-  devolvido_em timestamptz,
-  criado_por uuid not null references public.perfis(id) on delete restrict,
-  criado_em timestamptz not null default now(),
-  constraint emprestimos_datas_validas check (data_devolucao > data_emprestimo)
-);
+alter table public.livros add column if not exists resumo text;
+alter table public.livros add column if not exists capa_path text;
+alter table public.livros add column if not exists atualizado_em timestamptz not null default now();
 
 create table if not exists public.reservas (
   id bigint generated always as identity primary key,
   livro_id bigint not null references public.livros(id) on delete restrict,
   usuario_id uuid not null references public.perfis(id) on delete restrict,
-  status text not null default 'ativa' check (
-    status in ('ativa', 'atendida', 'cancelada')
-  ),
+  status text not null default 'ativa' check (status in ('ativa', 'atendida', 'cancelada')),
   criado_em timestamptz not null default now(),
   atualizado_em timestamptz not null default now(),
   finalizado_em timestamptz
 );
 
-create index if not exists perfis_tipo_idx on public.perfis(tipo);
-create index if not exists livros_titulo_idx on public.livros(titulo);
-create index if not exists livros_criado_por_idx on public.livros(criado_por);
-create index if not exists emprestimos_usuario_idx on public.emprestimos(usuario_id);
-create index if not exists emprestimos_livro_idx on public.emprestimos(livro_id);
-create index if not exists emprestimos_criado_por_idx on public.emprestimos(criado_por);
-create index if not exists emprestimos_ativos_idx
-  on public.emprestimos(livro_id) where devolvido_em is null;
 create index if not exists emprestimos_usuario_ativos_idx
   on public.emprestimos(usuario_id, data_devolucao) where devolvido_em is null;
 create index if not exists reservas_usuario_status_idx
@@ -74,66 +30,8 @@ create index if not exists reservas_livro_status_idx
 create unique index if not exists reservas_ativas_unicas_idx
   on public.reservas(livro_id, usuario_id) where status = 'ativa';
 
--- O cadastro público cria somente aluno ou professor.
-create or replace function private.criar_perfil()
-returns trigger
-language plpgsql
-security definer
-set search_path = ''
-as $$
-declare
-  v_tipo text;
-  v_nome text;
-  v_turma text;
-begin
-  if tg_table_schema <> 'auth' or tg_table_name <> 'users' or tg_op <> 'INSERT' then
-    raise exception 'Função permitida somente pelo gatilho de cadastro';
-  end if;
-  v_tipo := case
-    when new.raw_user_meta_data ->> 'tipo' in ('aluno', 'professor')
-      then new.raw_user_meta_data ->> 'tipo'
-    else 'aluno'
-  end;
-  v_nome := coalesce(
-    nullif(trim(new.raw_user_meta_data ->> 'nome'), ''),
-    nullif(split_part(coalesce(new.email, ''), '@', 1), ''),
-    'Usuário'
-  );
-  v_turma := case
-    when v_tipo = 'aluno' then nullif(trim(new.raw_user_meta_data ->> 'turma'), '')
-    else null
-  end;
-  insert into public.perfis (id, nome, turma, tipo, email)
-  values (new.id, v_nome, v_turma, v_tipo, lower(new.email));
-  return new;
-end;
-$$;
-
-revoke all on function private.criar_perfil() from public, anon, authenticated;
-drop trigger if exists ao_criar_usuario on auth.users;
-create trigger ao_criar_usuario
-  after insert on auth.users
-  for each row execute function private.criar_perfil();
-
-create or replace function private.eh_admin()
-returns boolean
-language sql
-stable
-security definer
-set search_path = ''
-as $$
-  select (select auth.uid()) is not null and exists (
-    select 1 from public.perfis
-    where id = (select auth.uid()) and tipo = 'admin'
-  );
-$$;
-
 create or replace function private.pode_operar_biblioteca()
-returns boolean
-language sql
-stable
-security definer
-set search_path = ''
+returns boolean language sql stable security definer set search_path = ''
 as $$
   select (select auth.uid()) is not null and exists (
     select 1 from public.perfis
@@ -142,11 +40,7 @@ as $$
 $$;
 
 create or replace function private.pode_reservar()
-returns boolean
-language sql
-stable
-security definer
-set search_path = ''
+returns boolean language sql stable security definer set search_path = ''
 as $$
   select (select auth.uid()) is not null and exists (
     select 1 from public.perfis
@@ -154,19 +48,17 @@ as $$
   );
 $$;
 
-revoke all on function private.eh_admin() from public, anon;
 revoke all on function private.pode_operar_biblioteca() from public, anon;
 revoke all on function private.pode_reservar() from public, anon;
 grant usage on schema private to authenticated;
-grant execute on function private.eh_admin() to authenticated;
 grant execute on function private.pode_operar_biblioteca() to authenticated;
 grant execute on function private.pode_reservar() to authenticated;
 
-alter table public.perfis enable row level security;
-alter table public.livros enable row level security;
-alter table public.emprestimos enable row level security;
 alter table public.reservas enable row level security;
 
+drop policy if exists perfis_ler_proprio_ou_admin on public.perfis;
+drop policy if exists perfis_ler_proprio_ou_equipe on public.perfis;
+drop policy if exists perfis_atualizar_admin on public.perfis;
 create policy perfis_ler_proprio_ou_equipe on public.perfis
   for select to authenticated
   using (id = (select auth.uid()) or (select private.pode_operar_biblioteca()));
@@ -178,8 +70,12 @@ create policy perfis_atualizar_admin on public.perfis
     and tipo in ('aluno', 'professor', 'bibliotecaria')
   );
 
-create policy livros_ler_autenticado on public.livros
-  for select to authenticated using (true);
+drop policy if exists livros_inserir_admin on public.livros;
+drop policy if exists livros_atualizar_admin on public.livros;
+drop policy if exists livros_excluir_admin on public.livros;
+drop policy if exists livros_inserir_equipe on public.livros;
+drop policy if exists livros_atualizar_equipe on public.livros;
+drop policy if exists livros_excluir_equipe on public.livros;
 create policy livros_inserir_equipe on public.livros
   for insert to authenticated
   with check (
@@ -190,9 +86,14 @@ create policy livros_atualizar_equipe on public.livros
   using ((select private.pode_operar_biblioteca()))
   with check ((select private.pode_operar_biblioteca()));
 create policy livros_excluir_equipe on public.livros
-  for delete to authenticated
-  using ((select private.pode_operar_biblioteca()));
+  for delete to authenticated using ((select private.pode_operar_biblioteca()));
 
+drop policy if exists emprestimos_ler_proprio_ou_admin on public.emprestimos;
+drop policy if exists emprestimos_inserir_admin on public.emprestimos;
+drop policy if exists emprestimos_atualizar_admin on public.emprestimos;
+drop policy if exists emprestimos_ler_proprio_ou_equipe on public.emprestimos;
+drop policy if exists emprestimos_inserir_equipe on public.emprestimos;
+drop policy if exists emprestimos_atualizar_equipe on public.emprestimos;
 create policy emprestimos_ler_proprio_ou_equipe on public.emprestimos
   for select to authenticated
   using (
@@ -208,6 +109,10 @@ create policy emprestimos_atualizar_equipe on public.emprestimos
   using ((select private.pode_operar_biblioteca()))
   with check ((select private.pode_operar_biblioteca()));
 
+drop policy if exists reservas_ler_proprio_ou_equipe on public.reservas;
+drop policy if exists reservas_criar_propria on public.reservas;
+drop policy if exists reservas_atualizar_equipe on public.reservas;
+drop policy if exists reservas_cancelar_propria on public.reservas;
 create policy reservas_ler_proprio_ou_equipe on public.reservas
   for select to authenticated
   using (
@@ -230,10 +135,7 @@ create policy reservas_cancelar_propria on public.reservas
   with check (usuario_id = (select auth.uid()) and status = 'cancelada');
 
 create or replace function public.reservar_livro(p_livro_id bigint)
-returns bigint
-language plpgsql
-security invoker
-set search_path = ''
+returns bigint language plpgsql security invoker set search_path = ''
 as $$
 declare
   v_reserva_id bigint;
@@ -253,8 +155,7 @@ begin
     raise exception using errcode = 'P0001', message = 'Você já está com este livro emprestado';
   end if;
   insert into public.reservas (livro_id, usuario_id)
-  values (p_livro_id, (select auth.uid()))
-  returning id into v_reserva_id;
+  values (p_livro_id, (select auth.uid())) returning id into v_reserva_id;
   return v_reserva_id;
 exception
   when unique_violation then
@@ -263,10 +164,7 @@ end;
 $$;
 
 create or replace function public.cancelar_reserva(p_reserva_id bigint)
-returns bigint
-language plpgsql
-security invoker
-set search_path = ''
+returns bigint language plpgsql security invoker set search_path = ''
 as $$
 declare
   v_usuario_id uuid := (select auth.uid());
@@ -294,10 +192,7 @@ create or replace function public.registrar_emprestimo(
   p_data_emprestimo date,
   p_data_devolucao date
 )
-returns bigint
-language plpgsql
-security invoker
-set search_path = ''
+returns bigint language plpgsql security invoker set search_path = ''
 as $$
 declare
   v_livro public.livros%rowtype;
@@ -343,10 +238,7 @@ end;
 $$;
 
 create or replace function public.registrar_devolucao(p_emprestimo_id bigint)
-returns bigint
-language plpgsql
-security invoker
-set search_path = ''
+returns bigint language plpgsql security invoker set search_path = ''
 as $$
 declare
   v_emprestimo public.emprestimos%rowtype;
@@ -359,9 +251,7 @@ begin
   if not found then
     raise exception using errcode = 'P0002', message = 'Empréstimo não encontrado';
   end if;
-  if v_emprestimo.devolvido_em is not null then
-    return v_emprestimo.id;
-  end if;
+  if v_emprestimo.devolvido_em is not null then return v_emprestimo.id; end if;
   update public.emprestimos set devolvido_em = now() where id = p_emprestimo_id;
   update public.livros
   set quantidade_emprestada = greatest(0, quantidade_emprestada - 1),
@@ -372,10 +262,7 @@ end;
 $$;
 
 create or replace function public.definir_tipo_usuario(p_usuario_id uuid, p_tipo text)
-returns uuid
-language plpgsql
-security invoker
-set search_path = ''
+returns uuid language plpgsql security invoker set search_path = ''
 as $$
 begin
   if not (select private.eh_admin()) then
@@ -395,7 +282,6 @@ begin
 end;
 $$;
 
--- Capas são mídia pública; somente a equipe pode enviar ou apagar.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (
   'capas-livros', 'capas-livros', true, 5242880,
@@ -407,6 +293,10 @@ on conflict (id) do update set
   file_size_limit = excluded.file_size_limit,
   allowed_mime_types = excluded.allowed_mime_types;
 
+drop policy if exists capas_livros_inserir_equipe on storage.objects;
+drop policy if exists capas_livros_ler_equipe on storage.objects;
+drop policy if exists capas_livros_atualizar_equipe on storage.objects;
+drop policy if exists capas_livros_excluir_equipe on storage.objects;
 create policy capas_livros_inserir_equipe on storage.objects
   for insert to authenticated
   with check (bucket_id = 'capas-livros' and (select private.pode_operar_biblioteca()));
@@ -421,18 +311,13 @@ create policy capas_livros_excluir_equipe on storage.objects
   for delete to authenticated
   using (bucket_id = 'capas-livros' and (select private.pode_operar_biblioteca()));
 
-revoke all on table public.perfis, public.livros, public.emprestimos, public.reservas from anon;
-revoke all on table public.perfis, public.livros, public.emprestimos, public.reservas from authenticated;
+revoke all on table public.reservas from anon, authenticated;
+revoke all on table public.perfis from anon, authenticated;
 grant select, update(tipo, turma) on table public.perfis to authenticated;
-grant select, insert, update, delete on table public.livros to authenticated;
-grant select, insert, update on table public.emprestimos to authenticated;
 grant select on table public.reservas to authenticated;
 grant insert(livro_id, usuario_id, status) on table public.reservas to authenticated;
 grant update(status, atualizado_em, finalizado_em) on table public.reservas to authenticated;
-grant usage, select on sequence public.livros_id_seq to authenticated;
-grant usage, select on sequence public.emprestimos_id_seq to authenticated;
 grant usage, select on sequence public.reservas_id_seq to authenticated;
-
 revoke all on function public.reservar_livro(bigint) from public, anon, authenticated;
 revoke all on function public.cancelar_reserva(bigint) from public, anon, authenticated;
 revoke all on function public.registrar_emprestimo(bigint, uuid, date, date) from public, anon, authenticated;
@@ -445,6 +330,3 @@ grant execute on function public.registrar_devolucao(bigint) to authenticated;
 grant execute on function public.definir_tipo_usuario(uuid, text) to authenticated;
 
 commit;
-
--- O primeiro administrador é definido uma vez pelo SQL Editor:
--- update public.perfis set tipo = 'admin' where email = 'seu-email@exemplo.com';

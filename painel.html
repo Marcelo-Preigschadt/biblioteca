@@ -10,20 +10,16 @@
 <body class="app-body" data-page="painel">
   <div class="app-layout">
     <aside class="sidebar">
-      <a class="sidebar-logo" href="painel.html">
-        <span class="brand-mark" aria-hidden="true">📚</span>
-        <span><strong>Biblioteca</strong><small>Sistema escolar</small></span>
-      </a>
+      <a class="sidebar-logo" href="painel.html"><span class="brand-mark">📚</span><span><strong>Biblioteca</strong><small>Sistema escolar</small></span></a>
       <span class="sidebar-label">MENU</span>
       <nav class="sidebar-nav" aria-label="Menu principal">
-        <a class="active" href="painel.html"><span aria-hidden="true">⌂</span>Início</a>
-        <a href="acervo.html"><span aria-hidden="true">▤</span>Acervo</a>
-        <a href="emprestimos.html"><span aria-hidden="true">⇄</span>Empréstimos</a>
+        <a class="active" href="painel.html"><span>⌂</span>Início</a>
+        <a href="acervo.html"><span>▤</span>Acervo</a>
+        <a href="reservas.html"><span>⌛</span>Reservas</a>
+        <a href="emprestimos.html" data-staff-only hidden><span>⇄</span>Empréstimos</a>
+        <a href="usuarios.html" data-admin-only hidden><span>♟</span>Usuários</a>
       </nav>
-      <div class="admin-note" data-admin-only hidden>
-        <span aria-hidden="true">✦</span>
-        <div><strong>Modo administrador</strong><small>Ferramentas de gestão habilitadas.</small></div>
-      </div>
+      <div class="admin-note" data-staff-only hidden><span>✦</span><div><strong>Modo de gestão</strong><small>Acervo e circulação habilitados.</small></div></div>
       <footer class="sidebar-footer"><span>Biblioteca Escolar</span><small>IEE Vicente Dutra</small></footer>
     </aside>
 
@@ -31,35 +27,27 @@
       <header class="topbar">
         <div><span class="eyebrow">PAINEL</span><h1>Visão geral</h1></div>
         <div class="account-menu">
-          <button id="accountButton" class="account-button" type="button" aria-expanded="false">
-            <span class="avatar" aria-hidden="true">👤</span>
-            <span><strong data-user-name>Carregando...</strong><small data-user-role></small></span>
-            <span aria-hidden="true">⌄</span>
-          </button>
-          <div id="accountPanel" class="account-panel" hidden>
-            <strong data-user-name></strong>
-            <span data-user-email></span>
-            <span><b>Turma:</b> <span data-user-class></span></span>
-            <button class="button button-ghost button-block" data-logout type="button">Sair da conta</button>
-          </div>
+          <button id="accountButton" class="account-button" type="button" aria-expanded="false"><span class="avatar">👤</span><span><strong data-user-name>Carregando...</strong><small data-user-role></small></span><span>⌄</span></button>
+          <div id="accountPanel" class="account-panel" hidden><strong data-user-name></strong><span data-user-email></span><span><b>Turma:</b> <span data-user-class></span></span><button class="button button-ghost button-block" data-logout type="button">Sair da conta</button></div>
         </div>
       </header>
 
       <main class="content">
         <div id="pageMessage" class="message" role="alert" hidden></div>
         <section class="welcome-card">
-          <div><span class="eyebrow eyebrow-light">BIBLIOTECA ESCOLAR</span><h2>Olá, <span id="welcomeName">leitor</span>.</h2><p>Confira a situação do acervo e encontre sua próxima leitura.</p></div>
-          <a class="button button-light" href="acervo.html">Consultar acervo</a>
+          <div><span class="eyebrow eyebrow-light">BIBLIOTECA ESCOLAR</span><h2>Olá, <span id="welcomeName">leitor</span>.</h2><p id="welcomeText">Consulte o acervo e reserve sua próxima leitura.</p></div>
+          <a id="welcomeAction" class="button button-light" href="acervo.html">Consultar acervo</a>
         </section>
 
-        <section class="stats-grid" aria-label="Resumo do acervo">
-          <article class="stat-card"><span class="stat-icon">▤</span><div><small>Títulos cadastrados</small><strong id="statTitles">—</strong></div></article>
-          <article class="stat-card"><span class="stat-icon stat-green">✓</span><div><small>Exemplares disponíveis</small><strong id="statAvailable">—</strong></div></article>
-          <article class="stat-card"><span class="stat-icon stat-gold">⇄</span><div><small id="loanStatLabel">Seus empréstimos ativos</small><strong id="statLoans">—</strong></div></article>
+        <section class="stats-grid stats-grid-four" aria-label="Resumo da biblioteca">
+          <article class="stat-card"><span class="stat-icon">▤</span><div><small id="statLabelTitles">Títulos cadastrados</small><strong id="statTitles">—</strong></div></article>
+          <article class="stat-card"><span class="stat-icon stat-green">✓</span><div><small id="statLabelAvailable">Exemplares disponíveis</small><strong id="statAvailable">—</strong></div></article>
+          <article class="stat-card"><span class="stat-icon stat-gold">⌛</span><div><small id="statLabelReservations">Reservas ativas</small><strong id="statReservations">—</strong></div></article>
+          <article class="stat-card"><span class="stat-icon stat-red">!</span><div><small id="statLabelOverdue">Empréstimos atrasados</small><strong id="statOverdue">—</strong></div></article>
         </section>
 
         <section class="panel-section">
-          <div class="section-heading"><div><span class="eyebrow">DESTAQUES</span><h2>Disponíveis para empréstimo</h2></div><a href="acervo.html">Ver todo o acervo →</a></div>
+          <div class="section-heading"><div><span class="eyebrow">DESTAQUES</span><h2>Livros do acervo</h2></div><a href="acervo.html">Ver todo o acervo →</a></div>
           <div id="availableBooks" class="book-grid" aria-live="polite"><div class="loading-state">Carregando acervo...</div></div>
         </section>
       </main>
