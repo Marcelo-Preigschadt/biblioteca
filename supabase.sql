@@ -42,8 +42,10 @@ create table if not exists public.emprestimos (
 
 create index if not exists perfis_tipo_idx on public.perfis(tipo);
 create index if not exists livros_titulo_idx on public.livros(titulo);
+create index if not exists livros_criado_por_idx on public.livros(criado_por);
 create index if not exists emprestimos_usuario_idx on public.emprestimos(usuario_id);
 create index if not exists emprestimos_livro_idx on public.emprestimos(livro_id);
+create index if not exists emprestimos_criado_por_idx on public.emprestimos(criado_por);
 create index if not exists emprestimos_ativos_idx
   on public.emprestimos(livro_id)
   where devolvido_em is null;
