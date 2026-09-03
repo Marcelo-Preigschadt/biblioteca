@@ -148,7 +148,15 @@ async function requireUser() {
 }
 
 function installCommonUi(current) {
+  const initials = current.profile.nome
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toLocaleUpperCase("pt-BR");
   document.querySelectorAll("[data-user-name]").forEach((el) => (el.textContent = current.profile.nome));
+  document.querySelectorAll("[data-user-initials]").forEach((el) => (el.textContent = initials || "VD"));
   document.querySelectorAll("[data-user-role]").forEach((el) => (el.textContent = roleLabel(current.profile.tipo)));
   document.querySelectorAll("[data-user-email]").forEach((el) => (el.textContent = current.profile.email));
   document.querySelectorAll("[data-user-class]").forEach((el) => (el.textContent = current.profile.turma || "Não informada"));
@@ -281,7 +289,7 @@ function coverMarkup(book, className = "catalog-cover") {
   const url = getCoverUrl(book.capa_path);
   return url
     ? `<div class="${className}"><img src="${escapeHtml(url)}" alt="Capa de ${escapeHtml(book.titulo)}" loading="lazy"></div>`
-    : `<div class="${className} cover-placeholder" aria-label="Livro sem capa"><span>📖</span></div>`;
+    : `<div class="${className} cover-placeholder" aria-label="Livro sem capa"><span>SEM<br>CAPA</span></div>`;
 }
 
 async function fetchBooks() {

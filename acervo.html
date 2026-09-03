@@ -10,16 +10,16 @@
 <body class="app-body" data-page="acervo">
   <div class="app-layout">
     <aside class="sidebar">
-      <a class="sidebar-logo" href="painel.html"><span class="brand-mark">📚</span><span><strong>Biblioteca</strong><small>Sistema escolar</small></span></a>
+      <a class="sidebar-logo" href="painel.html"><span class="brand-mark">VD</span><span><strong>Biblioteca</strong><small>Acervo escolar</small></span></a>
       <span class="sidebar-label">MENU</span>
       <nav class="sidebar-nav" aria-label="Menu principal">
-        <a href="painel.html"><span>⌂</span>Início</a>
-        <a class="active" href="acervo.html"><span>▤</span>Acervo</a>
-        <a href="reservas.html"><span>⌛</span>Reservas</a>
-        <a href="emprestimos.html" data-staff-only hidden><span>⇄</span>Empréstimos</a>
-        <a href="usuarios.html" data-admin-only hidden><span>♟</span>Usuários</a>
+        <a href="painel.html"><span class="nav-index">01</span>Início</a>
+        <a class="active" href="acervo.html"><span class="nav-index">02</span>Acervo</a>
+        <a href="reservas.html"><span class="nav-index">03</span>Reservas</a>
+        <a href="emprestimos.html" data-staff-only hidden><span class="nav-index">04</span>Empréstimos</a>
+        <a href="usuarios.html" data-admin-only hidden><span class="nav-index">05</span>Usuários</a>
       </nav>
-      <div class="admin-note" data-staff-only hidden><span>✦</span><div><strong>Gestão do acervo</strong><small>Cadastro, capas e empréstimos.</small></div></div>
+      <div class="admin-note" data-staff-only hidden><span class="note-dot"></span><div><strong>Gestão do acervo</strong><small>Cadastro, capas e empréstimos.</small></div></div>
       <footer class="sidebar-footer"><span>Biblioteca Escolar</span><small>IEE Vicente Dutra</small></footer>
     </aside>
 
@@ -27,7 +27,7 @@
       <header class="topbar">
         <div><span class="eyebrow">CATÁLOGO</span><h1>Acervo</h1></div>
         <div class="account-menu">
-          <button id="accountButton" class="account-button" type="button" aria-expanded="false"><span class="avatar">👤</span><span><strong data-user-name>Carregando...</strong><small data-user-role></small></span><span>⌄</span></button>
+          <button id="accountButton" class="account-button" type="button" aria-expanded="false"><span class="avatar" data-user-initials>VD</span><span><strong data-user-name>Carregando...</strong><small data-user-role></small></span><span>⌄</span></button>
           <div id="accountPanel" class="account-panel" hidden><strong data-user-name></strong><span data-user-email></span><span><b>Turma:</b> <span data-user-class></span></span><button class="button button-ghost button-block" data-logout type="button">Sair da conta</button></div>
         </div>
       </header>
@@ -63,7 +63,7 @@
         <div class="field field-wide">
           <span>Capa do livro (opcional)</span>
           <div class="cover-upload">
-            <div class="cover-preview"><img id="coverPreviewImage" alt="Prévia da capa" hidden><span id="coverPreviewEmpty">📖</span></div>
+            <div class="cover-preview"><img id="coverPreviewImage" alt="Prévia da capa" hidden><span id="coverPreviewEmpty">CAPA</span></div>
             <div><label class="button button-ghost" for="bookCover">Fotografar ou escolher imagem</label><input id="bookCover" class="visually-hidden" name="capa" type="file" accept="image/jpeg,image/png,image/webp" capture="environment"><small>JPG, PNG ou WebP, até 5 MB.</small><button id="removeCover" class="text-button" type="button">Remover capa</button></div>
           </div>
         </div>
