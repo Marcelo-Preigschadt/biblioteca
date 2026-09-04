@@ -149,7 +149,7 @@ input::placeholder, textarea::placeholder { color: #8b95a3; }
 
 /* Painel */
 .welcome-card { position: relative; min-height: 250px; overflow: hidden; padding: clamp(32px, 5vw, 64px); display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; border-radius: var(--radius); color: #fff; background: var(--navy); isolation: isolate; }
-.welcome-card::before { content: ""; position: absolute; right: 4%; bottom: -34%; width: clamp(240px, 29vw, 410px); aspect-ratio: 1; z-index: -1; opacity: .13; background: url("../img/brasao-vicente-dutra.png") center / contain no-repeat; }
+.welcome-card::before { content: ""; position: absolute; right: 4%; bottom: -34%; width: clamp(240px, 29vw, 410px); aspect-ratio: 1; z-index: -1; opacity: .13; background: url("../img/brasao-vicente-dutra.png?v=2") center / contain no-repeat; }
 .welcome-card::after { content: ""; position: absolute; top: 0; left: 0; width: 36%; height: 8px; background: var(--red); }
 .welcome-card h2 { margin: 0 0 10px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(3rem, 5vw, 5.1rem); font-weight: 400; line-height: .98; letter-spacing: -.055em; }
 .welcome-card p { max-width: 620px; margin-bottom: 0; color: rgba(255,255,255,.67); }
