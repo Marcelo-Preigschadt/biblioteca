@@ -938,6 +938,7 @@ const initializers = {
   reservas: () => initProtected(initReservas),
   emprestimos: () => initProtected(initEmprestimos),
   usuarios: () => initProtected(initUsuarios),
+  sobre: () => initProtected(async () => {}),
 };
 
 initializers[page]?.();

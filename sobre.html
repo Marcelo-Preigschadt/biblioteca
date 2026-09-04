@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Empréstimos da Biblioteca Escolar Vicente Dutra.">
-  <title>Empréstimos | Biblioteca Escolar</title>
+  <meta name="description" content="Sobre o sistema da Biblioteca Escolar Vicente Dutra.">
+  <title>Sobre | Biblioteca Escolar</title>
   <link rel="icon" type="image/png" href="assets/img/brasao-vicente-dutra.png">
   <link rel="stylesheet" href="assets/css/style.css?v=4">
 </head>
-<body class="app-body" data-page="emprestimos">
+<body class="app-body" data-page="sobre">
   <div class="app-layout">
     <aside class="sidebar">
       <a class="sidebar-logo" href="painel.html"><img class="brand-crest" src="assets/img/brasao-vicente-dutra.png" alt="Brasão do IEE Vicente Dutra"><span><strong>Biblioteca</strong><small>IEE Vicente Dutra</small></span></a>
@@ -17,17 +17,17 @@
         <a href="painel.html"><span class="nav-index">01</span>Início</a>
         <a href="acervo.html"><span class="nav-index">02</span>Acervo</a>
         <a href="reservas.html"><span class="nav-index">03</span>Reservas</a>
-        <a class="active" href="emprestimos.html" data-staff-only hidden><span class="nav-index">04</span>Empréstimos</a>
+        <a href="emprestimos.html" data-staff-only hidden><span class="nav-index">04</span>Empréstimos</a>
         <a href="usuarios.html" data-admin-only hidden><span class="nav-index">05</span>Usuários</a>
-        <a href="sobre.html"><span class="nav-index">06</span>Sobre</a>
+        <a class="active" href="sobre.html"><span class="nav-index">06</span>Sobre</a>
       </nav>
-      <div class="admin-note" data-staff-only hidden><span class="note-dot"></span><div><strong>Circulação</strong><small>Empréstimos e devoluções.</small></div></div>
+      <div class="admin-note"><span class="note-dot"></span><div><strong>Biblioteca escolar</strong><small>Leitura, tecnologia e gestão do acervo.</small></div></div>
       <footer class="sidebar-footer"><span>Biblioteca Escolar</span><small>IEE Vicente Dutra</small></footer>
     </aside>
 
     <div class="workspace">
       <header class="topbar">
-        <div><span class="eyebrow">CONTROLE</span><h1>Empréstimos</h1></div>
+        <div><span class="eyebrow">INSTITUCIONAL</span><h1>Sobre</h1></div>
         <div class="account-menu">
           <button id="accountButton" class="account-button" type="button" aria-expanded="false"><span class="avatar" data-user-initials>VD</span><span><strong data-user-name>Carregando...</strong><small data-user-role></small></span><span>⌄</span></button>
           <div id="accountPanel" class="account-panel" hidden><strong data-user-name></strong><span data-user-email></span><span><b>Turma:</b> <span data-user-class></span></span><button class="button button-ghost button-block" data-logout type="button">Sair da conta</button></div>
@@ -36,14 +36,18 @@
 
       <main class="content">
         <div id="pageMessage" class="message" role="alert" hidden></div>
-        <section class="section-heading"><div><span class="eyebrow">BIBLIOTECA</span><h2>Todos os empréstimos</h2><p class="muted">Apenas bibliotecária e administrador registram devoluções.</p></div><a class="button button-primary" href="acervo.html">Registrar pelo acervo</a></section>
-        <section class="table-card">
-          <div class="table-toolbar">
-            <label class="search-field"><span>⌕</span><input id="loanSearch" type="search" placeholder="Pesquisar por livro ou leitor..." autocomplete="off"></label>
-            <select id="loanFilter" class="compact-select" aria-label="Filtrar empréstimos"><option value="ativos">Ativos</option><option value="todos">Todos</option><option value="devolvidos">Devolvidos</option><option value="atrasados">Atrasados</option></select>
+        <section class="about-hero">
+          <div class="about-crest-panel">
+            <img class="about-crest" src="assets/img/brasao-vicente-dutra.png" alt="Brasão do Instituto Estadual de Educação Vicente Dutra">
           </div>
-          <div class="table-scroll">
-            <table><thead><tr><th>Livro</th><th>Leitor</th><th>Empréstimo</th><th>Devolução prevista</th><th>Status</th><th>Ação</th></tr></thead><tbody id="loansTable"><tr><td colspan="6" class="empty-cell">Carregando empréstimos...</td></tr></tbody></table>
+          <div class="about-copy">
+            <span class="eyebrow eyebrow-light">BIBLIOTECA ESCOLAR</span>
+            <h2>Instituto Estadual de Educação Vicente Dutra</h2>
+            <p>Sistema de gestão do acervo escolar, reservas, empréstimos, devoluções e acompanhamento dos prazos de leitura.</p>
+            <div class="credits">
+              <small>Desenvolvido por</small>
+              <strong>Alunos turma 301 2026 - Prof. Marcelo Preigschadt</strong>
+            </div>
           </div>
         </section>
       </main>
