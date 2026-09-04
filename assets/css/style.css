@@ -67,6 +67,7 @@ h1, h2, h3 { text-wrap: balance; }
 .form-stack { display: grid; gap: 20px; }
 .field { display: grid; gap: 8px; min-width: 0; }
 .field > span:first-child, .profile-choice legend { color: var(--navy); font-size: .875rem; font-weight: 900; letter-spacing: .02em; }
+.field-help { display: block; color: var(--ink-soft); font-size: .78rem; line-height: 1.45; }
 input, select, textarea { width: 100%; padding: 0 14px; border: 1px solid #aeb7c5; border-radius: 3px; outline: 0; background: #fff; color: var(--ink); transition: border-color .16s, box-shadow .16s, background .16s; }
 input, select { height: 50px; }
 textarea { min-height: 126px; padding-top: 12px; resize: vertical; }

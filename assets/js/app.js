@@ -81,12 +81,35 @@ function roleLabel(role) {
   }[role] ?? "Usuário";
 }
 
+const institutionalDomains = Object.freeze({
+  aluno: "estudante.rs.gov.br",
+  professor: "educar.rs.gov.br",
+});
+
+function normalizeEmail(value = "") {
+  return String(value).trim().toLocaleLowerCase("pt-BR");
+}
+
+function institutionalEmailIsValid(email, role) {
+  const requiredDomain = institutionalDomains[role];
+  if (!requiredDomain) return true;
+  return new RegExp(`^[^@\\s]+@${requiredDomain.replaceAll(".", "\\.")}$`, "i").test(normalizeEmail(email));
+}
+
+function institutionalEmailRequirement(role) {
+  return role === "professor"
+    ? "Professores devem usar o e-mail institucional terminado em @educar.rs.gov.br."
+    : "Alunos devem usar o e-mail institucional terminado em @estudante.rs.gov.br.";
+}
+
 function friendlyError(error) {
   const message = String(error?.message ?? error ?? "Erro inesperado.");
   const lower = message.toLowerCase();
   if (lower.includes("invalid login credentials")) return "E-mail ou senha incorretos.";
   if (lower.includes("email not confirmed")) return "Confirme seu e-mail antes de entrar.";
   if (lower.includes("user already registered")) return "Este e-mail já está cadastrado.";
+  if (lower.includes("@estudante.rs.gov.br")) return institutionalEmailRequirement("aluno");
+  if (lower.includes("@educar.rs.gov.br")) return institutionalEmailRequirement("professor");
   if (lower.includes("password should be")) return "A senha precisa ter pelo menos 6 caracteres.";
   if (lower.includes("rate limit")) return "Muitas tentativas em pouco tempo. Aguarde alguns minutos.";
   if (lower.includes("livro sem exemplares")) return "Não há exemplares disponíveis deste livro.";
@@ -137,6 +160,11 @@ async function requireUser() {
     .eq("id", session.user.id)
     .single();
   if (error) throw error;
+  if (!institutionalEmailIsValid(profile.email, profile.tipo)) {
+    await supabase.auth.signOut();
+    window.location.replace("index.html?acesso=institucional");
+    return null;
+  }
   return {
     session,
     user: session.user,
@@ -195,6 +223,9 @@ async function initLogin() {
   }
   const params = new URLSearchParams(window.location.search);
   if (params.get("cadastro") === "ok") showMessage("Conta criada. Entre com seu e-mail e senha.", "success");
+  if (params.get("acesso") === "institucional") {
+    showMessage("Acesso permitido somente com o e-mail institucional correspondente ao perfil.", "info");
+  }
   const form = document.querySelector("#loginForm");
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -225,6 +256,8 @@ async function initCadastro() {
   const form = document.querySelector("#cadastroForm");
   const classField = document.querySelector("#turmaField");
   const classInput = document.querySelector("#turma");
+  const emailInput = document.querySelector("#email");
+  const emailRule = document.querySelector("#emailRule");
   const syncProfileChoice = () => {
     form.querySelectorAll(".profile-option").forEach((label) => {
       label.classList.toggle("selected", label.querySelector("input").checked);
@@ -233,12 +266,24 @@ async function initCadastro() {
     classField.hidden = !student;
     classInput.required = student;
     if (!student) classInput.value = "";
+    const role = form.tipo.value;
+    emailInput.placeholder = student
+      ? "seunome@estudante.rs.gov.br"
+      : "seunome@educar.rs.gov.br";
+    emailRule.textContent = institutionalEmailRequirement(role);
   };
   form.querySelectorAll('input[name="tipo"]').forEach((input) => input.addEventListener("change", syncProfileChoice));
   syncProfileChoice();
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     clearMessage();
+    const role = form.tipo.value;
+    const email = normalizeEmail(form.email.value);
+    if (!institutionalEmailIsValid(email, role)) {
+      showMessage(institutionalEmailRequirement(role));
+      emailInput.focus();
+      return;
+    }
     setLoading(form, true);
     try {
       const metadata = {
@@ -248,7 +293,7 @@ async function initCadastro() {
       };
       const emailRedirectTo = new URL("index.html", window.location.href).href;
       const { data, error } = await supabase.auth.signUp({
-        email: form.email.value.trim().toLowerCase(),
+        email,
         password: form.senha.value,
         options: { data: metadata, emailRedirectTo },
       });

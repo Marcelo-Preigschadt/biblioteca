@@ -6,7 +6,7 @@
   <meta name="description" content="Cadastro de leitores da Biblioteca Escolar Vicente Dutra.">
   <title>Criar conta | Biblioteca Escolar</title>
   <link rel="icon" type="image/png" href="assets/img/brasao-vicente-dutra.png?v=2">
-  <link rel="stylesheet" href="assets/css/style.css?v=5">
+  <link rel="stylesheet" href="assets/css/style.css?v=6">
 </head>
 <body class="auth-body" data-page="cadastro">
   <div class="auth-layout">
@@ -30,7 +30,7 @@
         <img class="auth-mobile-logo" src="assets/img/brasao-vicente-dutra.png?v=2" alt="Brasão do IEE Vicente Dutra">
         <span class="eyebrow">CADASTRO</span>
         <h2 id="signup-title">Criar conta</h2>
-        <p class="muted">Escolha seu perfil e preencha os dados.</p>
+        <p class="muted">Escolha seu perfil e use o e-mail institucional correspondente.</p>
 
         <div id="pageMessage" class="message" role="alert" hidden></div>
 
@@ -60,8 +60,9 @@
           </label>
 
           <label class="field">
-            <span>E-mail</span>
-            <input id="email" name="email" type="email" autocomplete="email" placeholder="seuemail@exemplo.com" required>
+            <span>E-mail institucional</span>
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="seunome@estudante.rs.gov.br" aria-describedby="emailRule" required>
+            <small id="emailRule" class="field-help">Alunos devem usar o e-mail institucional terminado em @estudante.rs.gov.br.</small>
           </label>
 
           <label class="field">
@@ -83,6 +84,6 @@
     </main>
   </div>
 
-  <script type="module" src="assets/js/app.js?v=4"></script>
+  <script type="module" src="assets/js/app.js?v=5"></script>
 </body>
 </html>
