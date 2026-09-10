@@ -183,9 +183,9 @@ input::placeholder, textarea::placeholder { color: #8b95a3; }
 
 /* Catálogo */
 .catalog-toolbar { margin-bottom: 28px; padding: 15px 17px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-top: 1px solid var(--navy); border-bottom: 1px solid var(--navy); background: #fff; }
-.catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(235px, 1fr)); gap: 38px 24px; align-items: start; }
+.catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 30px 20px; align-items: start; }
 .catalog-card { min-width: 0; display: flex; flex-direction: column; }
-.catalog-cover { aspect-ratio: 3 / 4.15; overflow: hidden; border: 1px solid #bdc5d1; border-radius: 2px; background: var(--surface-alt); box-shadow: 8px 10px 0 rgba(7,26,53,.08); }
+.catalog-cover { width: min(100%, 190px); aspect-ratio: 3 / 4.15; overflow: hidden; border: 1px solid #bdc5d1; border-radius: 2px; background: var(--surface-alt); box-shadow: 6px 8px 0 rgba(7,26,53,.08); }
 .catalog-cover img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .35s ease; }
 .catalog-card:hover .catalog-cover img { transform: scale(1.025); }
 .cover-placeholder { position: relative; overflow: hidden; display: grid; place-items: center; color: #fff; background: var(--blue); }
@@ -200,6 +200,12 @@ input::placeholder, textarea::placeholder { color: #8b95a3; }
 .catalog-actions { margin-top: auto; padding-top: 2px; display: flex; flex-wrap: wrap; gap: 7px; border-top: 1px solid var(--line); }
 .catalog-actions .button { margin-top: 12px; }
 .catalog-copy > .button { margin-top: auto; }
+.reservation-catalog { margin-bottom: 42px; padding-bottom: 36px; border-bottom: 1px solid var(--line); }
+.reservation-book-search { width: min(100%, 560px); margin-bottom: 18px; background: #fff; }
+.reservation-books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.reservation-books-grid .book-card { min-height: 150px; grid-template-columns: 92px minmax(0, 1fr); }
+.reservation-books-grid .book-card-cover { min-height: 150px; }
+.reservation-books-grid .book-card-copy { padding: 15px; }
 .cover-upload { display: grid; grid-template-columns: 118px minmax(0, 1fr); align-items: center; gap: 18px; }
 .cover-upload > div:last-child { display: grid; justify-items: start; gap: 8px; }
 .cover-upload small { color: var(--ink-soft); font-size: .75rem; }
