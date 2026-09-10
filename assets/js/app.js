@@ -106,7 +106,7 @@ function friendlyError(error) {
   const message = String(error?.message ?? error ?? "Erro inesperado.");
   const lower = message.toLowerCase();
   if (lower.includes("invalid login credentials")) return "E-mail ou senha incorretos.";
-  if (lower.includes("email not confirmed")) return "Confirme seu e-mail antes de entrar.";
+  if (lower.includes("email not confirmed")) return "Sua conta ainda não foi liberada. Tente entrar novamente em alguns instantes.";
   if (lower.includes("user already registered")) return "Este e-mail já está cadastrado.";
   if (lower.includes("@estudante.rs.gov.br")) return institutionalEmailRequirement("aluno");
   if (lower.includes("@educar.rs.gov.br")) return institutionalEmailRequirement("professor");
@@ -291,19 +291,18 @@ async function initCadastro() {
         turma: form.tipo.value === "aluno" ? form.turma.value.trim() : null,
         tipo: form.tipo.value,
       };
-      const emailRedirectTo = new URL("index.html", window.location.href).href;
       const { data, error } = await supabase.auth.signUp({
         email,
         password: form.senha.value,
-        options: { data: metadata, emailRedirectTo },
+        options: { data: metadata },
       });
       if (error) throw error;
       if (data.session) {
         window.location.replace("painel.html");
       } else {
-        form.reset();
-        syncProfileChoice();
-        showMessage("Cadastro realizado. Verifique seu e-mail para confirmar a conta.", "success");
+        const { error: loginError } = await supabase.auth.signInWithPassword({ email, password: form.senha.value });
+        if (loginError) throw loginError;
+        window.location.replace("painel.html");
       }
     } catch (error) {
       showMessage(friendlyError(error));
@@ -850,7 +849,43 @@ async function initReservas(current) {
       showMessage(friendlyError(error));
     }
   });
-  if (current.isReader) renderReaderLoans(await fetchLoans());
+  if (current.isReader) {
+    let books = await fetchBooks();
+    let activeReservations = new Set(
+      reservations.filter((item) => item.status === "ativa").map((item) => Number(item.livro?.id)),
+    );
+    const searchInput = document.querySelector("#reservationBookSearch");
+    const booksGrid = document.querySelector("#reservationBooksGrid");
+    const renderReservationBooks = () => {
+      const term = searchInput.value.trim().toLocaleLowerCase("pt-BR");
+      const filtered = books.filter((book) =>
+        [book.titulo, book.autor, book.categoria].filter(Boolean)
+          .some((value) => String(value).toLocaleLowerCase("pt-BR").includes(term)),
+      );
+      booksGrid.innerHTML = filtered.length
+        ? filtered.map((book) => compactBookCard(book, current, activeReservations)).join("")
+        : '<div class="empty-state">Nenhum livro encontrado com essa busca.</div>';
+    };
+    renderReservationBooks();
+    searchInput.addEventListener("input", renderReservationBooks);
+    booksGrid.addEventListener("click", async (event) => {
+      const button = event.target.closest("[data-reserve-book]");
+      if (!button) return;
+      button.disabled = true;
+      try {
+        await reserveBook(button.dataset.reserveBook);
+        activeReservations.add(Number(button.dataset.reserveBook));
+        reservations = await fetchReservations();
+        render();
+        renderReservationBooks();
+        showMessage("Livro reservado. A bibliotecária já pode visualizar a solicitação.", "success");
+      } catch (error) {
+        button.disabled = false;
+        showMessage(friendlyError(error));
+      }
+    });
+    renderReaderLoans(await fetchLoans());
+  }
 }
 
 function renderLoans(loans) {
