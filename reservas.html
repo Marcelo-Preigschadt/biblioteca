@@ -6,7 +6,7 @@
   <meta name="description" content="Reservas e acompanhamento de livros da Biblioteca Escolar.">
   <title>Reservas | Biblioteca Escolar</title>
   <link rel="icon" type="image/png" href="assets/img/brasao-vicente-dutra.png?v=2">
-  <link rel="stylesheet" href="assets/css/style.css?v=6">
+  <link rel="stylesheet" href="assets/css/style.css?v=7">
 </head>
 <body class="app-body" data-page="reservas">
   <div class="app-layout">
@@ -36,6 +36,11 @@
 
       <main class="content">
         <div id="pageMessage" class="message" role="alert" hidden></div>
+        <section id="reservationCatalogSection" class="reservation-catalog" data-reader-only hidden>
+          <div class="section-heading"><div><span class="eyebrow">NOVA RESERVA</span><h2>Escolha um livro</h2><p class="muted">Pesquise pelo título, autor ou categoria e reserve aqui mesmo.</p></div></div>
+          <label class="search-field reservation-book-search"><span>⌕</span><input id="reservationBookSearch" type="search" placeholder="Buscar livro no acervo..." autocomplete="off"></label>
+          <div id="reservationBooksGrid" class="reservation-books-grid"><div class="loading-state">Carregando livros disponíveis...</div></div>
+        </section>
         <section class="section-heading"><div><span class="eyebrow">ACOMPANHAMENTO</span><h2 id="reservationsHeading">Livros reservados</h2><p id="reservationsDescription" class="muted">Reserve novos títulos diretamente pelo acervo.</p></div><a class="button button-primary" href="acervo.html" data-reader-only hidden>Consultar acervo</a></section>
         <section class="table-card">
           <div class="table-toolbar">
@@ -57,6 +62,6 @@
       </main>
     </div>
   </div>
-  <script type="module" src="assets/js/app.js?v=5"></script>
+  <script type="module" src="assets/js/app.js?v=6"></script>
 </body>
 </html>
