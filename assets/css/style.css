@@ -183,20 +183,20 @@ input::placeholder, textarea::placeholder { color: #8b95a3; }
 
 /* Catálogo */
 .catalog-toolbar { margin-bottom: 28px; padding: 15px 17px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-top: 1px solid var(--navy); border-bottom: 1px solid var(--navy); background: #fff; }
-.catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 30px 20px; align-items: start; }
-.catalog-card { min-width: 0; display: flex; flex-direction: column; }
-.catalog-cover { width: min(100%, 190px); aspect-ratio: 3 / 4.15; overflow: hidden; border: 1px solid #bdc5d1; border-radius: 2px; background: var(--surface-alt); box-shadow: 6px 8px 0 rgba(7,26,53,.08); }
+.catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 16px; align-items: stretch; }
+.catalog-card { min-width: 0; min-height: 188px; padding: 16px; display: grid; grid-template-columns: 105px minmax(0, 1fr); gap: 18px; border: 1px solid var(--line); border-left: 5px solid var(--green); border-radius: 4px; background: #fff; }
+.catalog-cover { width: 105px; height: 150px; aspect-ratio: auto; overflow: hidden; border: 1px solid #bdc5d1; border-radius: 2px; background: var(--surface-alt); box-shadow: 4px 5px 0 rgba(7,26,53,.08); }
 .catalog-cover img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .35s ease; }
 .catalog-card:hover .catalog-cover img { transform: scale(1.025); }
 .cover-placeholder { position: relative; overflow: hidden; display: grid; place-items: center; color: #fff; background: var(--blue); }
 .cover-placeholder::before { content: ""; position: absolute; inset: 9%; border: 1px solid rgba(255,255,255,.45); }
 .cover-placeholder::after { content: "VD"; position: absolute; right: -12%; bottom: -12%; color: rgba(255,255,255,.10); font-family: Georgia, serif; font-size: 7rem; font-weight: 700; line-height: 1; }
 .cover-placeholder span { position: relative; z-index: 1; font-family: "Courier New", monospace; font-size: .7rem; font-weight: 700; letter-spacing: .16em; line-height: 1.5; text-align: center; }
-.catalog-copy { min-width: 0; padding: 18px 2px 0; display: flex; flex: 1; flex-direction: column; }
-.catalog-copy h3 { margin: 13px 0 4px; font-family: Georgia, serif; font-size: 1.35rem; font-weight: 500; line-height: 1.2; letter-spacing: -.025em; }
+.catalog-copy { min-width: 0; padding: 0; display: flex; flex: 1; flex-direction: column; }
+.catalog-copy h3 { margin: 10px 0 4px; font-family: Georgia, serif; font-size: 1.2rem; font-weight: 500; line-height: 1.2; letter-spacing: -.025em; }
 .catalog-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--ink-soft); font-size: .72rem; }
 .catalog-author { margin-bottom: 12px; color: var(--ink-soft); font-size: .82rem; }
-.catalog-summary { display: -webkit-box; overflow: hidden; margin-bottom: 18px; color: var(--ink-soft); font-size: .82rem; line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.catalog-summary { display: -webkit-box; overflow: hidden; margin-bottom: 12px; color: var(--ink-soft); font-size: .8rem; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .catalog-actions { margin-top: auto; padding-top: 2px; display: flex; flex-wrap: wrap; gap: 7px; border-top: 1px solid var(--line); }
 .catalog-actions .button { margin-top: 12px; }
 .catalog-copy > .button { margin-top: auto; }
@@ -330,7 +330,7 @@ tbody tr:hover { background: #f6f8fc; }
   .section-heading-actions .button, .section-heading > .button { width: 100%; }
   .catalog-toolbar, .table-toolbar { align-items: stretch; flex-direction: column; }
   .search-field, .compact-select { width: 100%; }
-  .catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px 16px; }
+  .catalog-grid { grid-template-columns: 1fr; gap: 14px; }
   .catalog-copy h3 { font-size: 1.15rem; }
   .catalog-actions { display: grid; grid-template-columns: 1fr; }
   .catalog-actions .button { width: 100%; }
@@ -347,7 +347,8 @@ tbody tr:hover { background: #f6f8fc; }
   .nav-index { display: none; }
   .content { padding-inline: 16px; }
   .catalog-grid { grid-template-columns: 1fr; }
-  .catalog-cover { width: min(100%, 310px); }
+  .catalog-card { min-height: 166px; padding: 13px; grid-template-columns: 88px minmax(0, 1fr); gap: 13px; }
+  .catalog-cover { width: 88px; height: 126px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
