@@ -1,0 +1,26 @@
+name: Manter Supabase ativo
+
+on:
+  schedule:
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consultar o banco
+        env:
+          SUPABASE_URL: https://bpvkclssbaohjewcunji.supabase.co
+          SUPABASE_KEY: sb_publishable_fr4BKum6OJiSVka_Myymfw_vvIb2Yam
+        run: |
+          for tentativa in 1 2 3; do
+            if curl --fail --silent --show-error \
+              --header "apikey: ${SUPABASE_KEY}" \
+              --header "Authorization: Bearer ${SUPABASE_KEY}" \
+              "${SUPABASE_URL}/rest/v1/livros?select=id&limit=1" >/dev/null; then
+              exit 0
+            fi
+            sleep 20
+          done
+          exit 1
