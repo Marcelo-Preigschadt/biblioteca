@@ -13,26 +13,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Preparar PostgreSQL
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
       - name: Gerar backup lógico
-        env:
-          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-          BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
         run: |
-          test -n "${SUPABASE_DB_URL}"
-          test -n "${BACKUP_ENCRYPTION_KEY}"
           mkdir -p backups/database
-          arquivo="backups/database/biblioteca-$(date -u +%Y-%m-%d).tar.gz.enc"
-          supabase db dump --db-url "${SUPABASE_DB_URL}" --data-only --use-copy --file backup-dados.sql
-          supabase db dump --db-url "${SUPABASE_DB_URL}" --file backup-schema.sql
-          tar -czf backup.tar.gz backup-schema.sql backup-dados.sql
-          python -m pip install --quiet cryptography
-          python scripts/encrypt_backup.py backup.tar.gz "${arquivo}"
-          rm backup-schema.sql backup-dados.sql
-          rm backup.tar.gz
+          arquivo="backups/database/biblioteca-$(date -u +%Y-%m-%d).json.enc"
+          for tentativa in 1 2 3; do
+            if curl --fail --silent --show-error \
+              "https://bpvkclssbaohjewcunji.supabase.co/functions/v1/biblioteca-maintenance/backup" \
+              --output "${arquivo}"; then
+              break
+            fi
+            sleep 20
+          done
+          python -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["format"]=="biblioteca-backup-v1" and d["algorithm"]=="AES-256-GCM"' "${arquivo}"
           find backups/database -type f -name '*.enc' -mtime +70 -delete
       - name: Salvar backup criptografado
         run: |
