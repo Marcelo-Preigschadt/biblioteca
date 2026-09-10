@@ -172,6 +172,7 @@ async function requireUser() {
     isAdmin: profile.tipo === "admin",
     isStaff: ["bibliotecaria", "admin"].includes(profile.tipo),
     isReader: ["aluno", "professor"].includes(profile.tipo),
+    canReserve: ["aluno", "professor", "admin"].includes(profile.tipo),
   };
 }
 
@@ -190,7 +191,7 @@ function installCommonUi(current) {
   document.querySelectorAll("[data-user-class]").forEach((el) => (el.textContent = current.profile.turma || "Não informada"));
   document.querySelectorAll("[data-admin-only]").forEach((el) => (el.hidden = !current.isAdmin));
   document.querySelectorAll("[data-staff-only]").forEach((el) => (el.hidden = !current.isStaff));
-  document.querySelectorAll("[data-reader-only]").forEach((el) => (el.hidden = !current.isReader));
+  document.querySelectorAll("[data-reader-only]").forEach((el) => (el.hidden = !current.canReserve));
 
   const accountButton = document.querySelector("#accountButton");
   const accountPanel = document.querySelector("#accountPanel");
@@ -345,8 +346,8 @@ async function fetchBooks() {
   return data ?? [];
 }
 
-async function fetchActiveReservationBookIds() {
-  const { data, error } = await supabase.from("reservas").select("livro_id").eq("status", "ativa");
+async function fetchActiveReservationBookIds(userId) {
+  const { data, error } = await supabase.from("reservas").select("livro_id").eq("status", "ativa").eq("usuario_id", userId);
   if (error) throw error;
   return new Set((data ?? []).map((item) => Number(item.livro_id)));
 }
@@ -359,7 +360,7 @@ async function reserveBook(bookId) {
 function compactBookCard(book, current, activeReservations) {
   const available = Math.max(0, book.estoque_total - book.quantidade_emprestada);
   const reserved = activeReservations.has(Number(book.id));
-  const action = current.isReader
+  const action = current.canReserve
     ? `<button class="button button-primary button-small" type="button" data-reserve-book="${book.id}" ${reserved ? "disabled" : ""}>${reserved ? "Reservado" : "Reservar"}</button>`
     : `<a class="button button-ghost button-small" href="acervo.html">Gerenciar</a>`;
   return `<article class="book-card book-card-with-cover">
@@ -400,7 +401,7 @@ async function initPainel(current) {
     document.querySelector("#statLabelOverdue").textContent = "Seus empréstimos atrasados";
   }
 
-  const activeReservations = current.isReader ? await fetchActiveReservationBookIds() : new Set();
+  const activeReservations = current.canReserve ? await fetchActiveReservationBookIds(current.user.id) : new Set();
   const container = document.querySelector("#availableBooks");
   const highlights = books.slice(0, 6);
   if (!highlights.length) {
@@ -408,7 +409,7 @@ async function initPainel(current) {
     return;
   }
   container.innerHTML = highlights.map((book) => compactBookCard(book, current, activeReservations)).join("");
-  if (current.isReader) {
+  if (current.canReserve) {
     container.addEventListener("click", async (event) => {
       const button = event.target.closest("[data-reserve-book]");
       if (!button) return;
@@ -511,13 +512,13 @@ async function removeCoverFile(path) {
 async function initAcervo(current) {
   installDialogs();
   let books = await fetchBooks();
-  let activeReservations = current.isReader ? await fetchActiveReservationBookIds() : new Set();
+  let activeReservations = current.canReserve ? await fetchActiveReservationBookIds(current.user.id) : new Set();
   const render = () => renderBooks(books, current, activeReservations);
   render();
   document.querySelector("#bookSearch").addEventListener("input", render);
 
   const grid = document.querySelector("#booksGrid");
-  if (current.isReader) {
+  if (current.canReserve && !current.isStaff) {
     grid.addEventListener("click", async (event) => {
       const button = event.target.closest("[data-reserve-book]");
       if (!button) return;
@@ -786,8 +787,8 @@ function renderReservations(reservations, current) {
   }).join("");
 }
 
-async function fetchLoans() {
-  const { data, error } = await supabase
+async function fetchLoans(userId = null) {
+  let query = supabase
     .from("emprestimos")
     .select(`
       id, data_emprestimo, data_devolucao, devolvido_em,
@@ -795,6 +796,8 @@ async function fetchLoans() {
       leitor:perfis!emprestimos_usuario_id_fkey(id,nome,turma,tipo)
     `)
     .order("criado_em", { ascending: false });
+  if (userId) query = query.eq("usuario_id", userId);
+  const { data, error } = await query;
   if (error) throw error;
   return data ?? [];
 }
@@ -849,11 +852,9 @@ async function initReservas(current) {
       showMessage(friendlyError(error));
     }
   });
-  if (current.isReader) {
+  if (current.canReserve) {
     let books = await fetchBooks();
-    let activeReservations = new Set(
-      reservations.filter((item) => item.status === "ativa").map((item) => Number(item.livro?.id)),
-    );
+    let activeReservations = await fetchActiveReservationBookIds(current.user.id);
     const searchInput = document.querySelector("#reservationBookSearch");
     const booksGrid = document.querySelector("#reservationBooksGrid");
     const renderReservationBooks = () => {
@@ -884,7 +885,7 @@ async function initReservas(current) {
         showMessage(friendlyError(error));
       }
     });
-    renderReaderLoans(await fetchLoans());
+    renderReaderLoans(await fetchLoans(current.user.id));
   }
 }
 
