@@ -176,6 +176,13 @@ async function requireUser() {
   };
 }
 
+function syncRoleVisibility(current) {
+  document.body.dataset.accessProfile = current.profile.tipo;
+  document.querySelectorAll("[data-admin-only]").forEach((el) => (el.hidden = !current.isAdmin));
+  document.querySelectorAll("[data-staff-only]").forEach((el) => (el.hidden = !current.isStaff));
+  document.querySelectorAll("[data-reader-only]").forEach((el) => (el.hidden = !current.canReserve));
+}
+
 function installCommonUi(current) {
   const initials = current.profile.nome
     .trim()
@@ -189,9 +196,7 @@ function installCommonUi(current) {
   document.querySelectorAll("[data-user-role]").forEach((el) => (el.textContent = roleLabel(current.profile.tipo)));
   document.querySelectorAll("[data-user-email]").forEach((el) => (el.textContent = current.profile.email));
   document.querySelectorAll("[data-user-class]").forEach((el) => (el.textContent = current.profile.turma || "Não informada"));
-  document.querySelectorAll("[data-admin-only]").forEach((el) => (el.hidden = !current.isAdmin));
-  document.querySelectorAll("[data-staff-only]").forEach((el) => (el.hidden = !current.isStaff));
-  document.querySelectorAll("[data-reader-only]").forEach((el) => (el.hidden = !current.canReserve));
+  syncRoleVisibility(current);
 
   const accountButton = document.querySelector("#accountButton");
   const accountPanel = document.querySelector("#accountPanel");
@@ -392,9 +397,11 @@ async function initPainel(current) {
     (total, book) => total + Math.max(0, book.estoque_total - book.quantidade_emprestada),
     0,
   );
+  const availableTitles = books.filter((book) => book.estoque_total - book.quantidade_emprestada > 0).length;
   const overdue = loans.filter((loan) => !loan.devolvido_em && loan.data_devolucao < localDateIso()).length;
   document.querySelector("#statTitles").textContent = books.length;
   document.querySelector("#statAvailable").textContent = availableCopies;
+  document.querySelector("#statAvailableDetail").textContent = `Somados em ${availableTitles} ${availableTitles === 1 ? "título disponível" : "títulos disponíveis"}`;
   document.querySelector("#statReservations").textContent = reservationsResult.count ?? 0;
   document.querySelector("#statOverdue").textContent = overdue;
   if (current.isReader) {
@@ -418,6 +425,7 @@ async function initPainel(current) {
       try {
         await reserveBook(button.dataset.reserveBook);
         button.textContent = "Reservado";
+        syncRoleVisibility(current);
         showMessage("Reserva realizada. Acompanhe o status na página Reservas.", "success");
       } catch (error) {
         button.disabled = false;
@@ -566,6 +574,7 @@ async function initAcervo(current) {
         await reserveBook(button.dataset.reserveBook);
         activeReservations.add(Number(button.dataset.reserveBook));
         render();
+        syncRoleVisibility(current);
         showMessage("Livro reservado. A bibliotecária verá sua solicitação.", "success");
       } catch (error) {
         button.disabled = false;
@@ -994,6 +1003,7 @@ async function initReservas(current) {
         reservations = await fetchReservations();
         render();
         renderReservationBooks();
+        syncRoleVisibility(current);
         showMessage("Livro reservado. A bibliotecária já pode visualizar a solicitação.", "success");
       } catch (error) {
         button.disabled = false;
