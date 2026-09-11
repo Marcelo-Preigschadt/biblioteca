@@ -6,7 +6,7 @@
   <meta name="description" content="Painel da Biblioteca Escolar Vicente Dutra.">
   <title>Painel | Biblioteca Escolar</title>
   <link rel="icon" type="image/png" href="assets/img/brasao-vicente-dutra.png?v=2">
-  <link rel="stylesheet" href="assets/css/style.css?v=9">
+  <link rel="stylesheet" href="assets/css/style.css?v=10">
 </head>
 <body class="app-body" data-page="painel">
   <div class="app-layout">
@@ -16,10 +16,11 @@
       <nav class="sidebar-nav" aria-label="Menu principal">
         <a class="active" href="painel.html"><span class="nav-index">01</span>Início</a>
         <a href="acervo.html"><span class="nav-index">02</span>Acervo</a>
-        <a href="reservas.html"><span class="nav-index">03</span>Reservas</a>
-        <a href="emprestimos.html" data-staff-only hidden><span class="nav-index">04</span>Empréstimos</a>
-        <a href="usuarios.html" data-admin-only hidden><span class="nav-index">05</span>Usuários</a>
-        <a href="sobre.html"><span class="nav-index">06</span>Sobre</a>
+        <a href="gestao-acervo.html" data-staff-only hidden><span class="nav-index">03</span>Cadastrar livro</a>
+        <a href="reservas.html"><span class="nav-index">04</span>Reservas</a>
+        <a href="emprestimos.html" data-staff-only hidden><span class="nav-index">05</span>Empréstimos</a>
+        <a href="usuarios.html" data-admin-only hidden><span class="nav-index">06</span>Usuários</a>
+        <a href="sobre.html"><span class="nav-index">07</span>Sobre</a>
       </nav>
       <div class="admin-note" data-staff-only hidden><span class="note-dot"></span><div><strong>Modo de gestão</strong><small>Acervo e circulação habilitados.</small></div></div>
       <footer class="sidebar-footer"><span>Biblioteca Escolar</span><small>IEE Vicente Dutra</small></footer>
@@ -55,6 +56,6 @@
       </main>
     </div>
   </div>
-  <script type="module" src="assets/js/app.js?v=8"></script>
+  <script type="module" src="assets/js/app.js?v=9"></script>
 </body>
 </html>
