@@ -3,7 +3,10 @@ import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "./config.js";
 
 const page = document.body.dataset.page;
 const COVER_BUCKET = "capas-livros";
-const MAX_COVER_SIZE = 5 * 1024 * 1024;
+const MAX_COVER_INPUT_SIZE = 15 * 1024 * 1024;
+const MAX_COVER_WIDTH = 1000;
+const MAX_COVER_HEIGHT = 1500;
+const TARGET_COVER_SIZE = 250 * 1024;
 const COVER_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const configured =
   SUPABASE_URL.startsWith("https://") &&
@@ -520,17 +523,94 @@ function installDialogs() {
 function validateCover(file) {
   if (!file) return;
   if (!COVER_TYPES.has(file.type)) throw new Error("A capa deve ser uma imagem JPG, PNG ou WebP.");
-  if (file.size > MAX_COVER_SIZE) throw new Error("A imagem da capa deve ter no máximo 5 MB.");
+  if (file.size > MAX_COVER_INPUT_SIZE) throw new Error("A imagem original deve ter no máximo 15 MB.");
+}
+
+function canvasToBlob(canvas, type, quality) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("Não foi possível processar a imagem.")), type, quality);
+  });
+}
+
+async function loadCoverImage(file) {
+  if ("createImageBitmap" in window) {
+    try {
+      return await createImageBitmap(file, { imageOrientation: "from-image" });
+    } catch {
+      return createImageBitmap(file);
+    }
+  }
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    return await new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error("Não foi possível abrir a imagem selecionada."));
+      image.src = objectUrl;
+    });
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
+function drawCoverCanvas(source, width, height) {
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(width));
+  canvas.height = Math.max(1, Math.round(height));
+  const context = canvas.getContext("2d", { alpha: false });
+  if (!context) throw new Error("Este navegador não permite processar a imagem.");
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.drawImage(source, 0, 0, canvas.width, canvas.height);
+  return canvas;
+}
+
+async function compressCover(file) {
+  validateCover(file);
+  const image = await loadCoverImage(file);
+  try {
+    const sourceWidth = image.naturalWidth || image.width;
+    const sourceHeight = image.naturalHeight || image.height;
+    if (!sourceWidth || !sourceHeight) throw new Error("A imagem selecionada não possui dimensões válidas.");
+    const ratio = Math.min(1, MAX_COVER_WIDTH / sourceWidth, MAX_COVER_HEIGHT / sourceHeight);
+    let canvas = drawCoverCanvas(image, sourceWidth * ratio, sourceHeight * ratio);
+    let quality = 0.84;
+    let blob = await canvasToBlob(canvas, "image/webp", quality);
+
+    while (blob.size > TARGET_COVER_SIZE && quality > 0.52) {
+      quality = Math.max(0.52, quality - 0.08);
+      blob = await canvasToBlob(canvas, "image/webp", quality);
+    }
+
+    while (blob.size > TARGET_COVER_SIZE && (canvas.width > 360 || canvas.height > 540)) {
+      const reducedCanvas = drawCoverCanvas(canvas, canvas.width * 0.86, canvas.height * 0.86);
+      canvas.width = 1;
+      canvas.height = 1;
+      canvas = reducedCanvas;
+      blob = await canvasToBlob(canvas, "image/webp", 0.68);
+    }
+
+    if (blob.size > TARGET_COVER_SIZE) {
+      blob = await canvasToBlob(canvas, "image/webp", 0.5);
+    }
+    if (blob.size > TARGET_COVER_SIZE) {
+      throw new Error("Não foi possível reduzir esta imagem para 250 KB. Escolha outra fotografia da capa.");
+    }
+    return blob;
+  } finally {
+    if (typeof image.close === "function") image.close();
+  }
 }
 
 async function uploadCover(file, userId) {
-  validateCover(file);
-  const extension = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" }[file.type];
+  const compressedCover = await compressCover(file);
   const randomPart = crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  const path = `${userId}/${randomPart}.${extension}`;
-  const { error } = await supabase.storage.from(COVER_BUCKET).upload(path, file, {
+  const path = `${userId}/${randomPart}.webp`;
+  const { error } = await supabase.storage.from(COVER_BUCKET).upload(path, compressedCover, {
     cacheControl: "3600",
-    contentType: file.type,
+    contentType: "image/webp",
     upsert: false,
   });
   if (error) throw error;
