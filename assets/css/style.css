@@ -183,9 +183,9 @@ input::placeholder, textarea::placeholder { color: #8b95a3; }
 
 /* Catálogo */
 .catalog-toolbar { margin-bottom: 28px; padding: 15px 17px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-top: 1px solid var(--navy); border-bottom: 1px solid var(--navy); background: #fff; }
-.catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 16px; align-items: stretch; }
-.catalog-card { min-width: 0; min-height: 188px; padding: 16px; display: grid; grid-template-columns: 105px minmax(0, 1fr); gap: 18px; border: 1px solid var(--line); border-left: 5px solid var(--green); border-radius: 4px; background: #fff; }
-.catalog-cover { width: 105px; height: 150px; aspect-ratio: auto; overflow: hidden; border: 1px solid #bdc5d1; border-radius: 2px; background: var(--surface-alt); box-shadow: 4px 5px 0 rgba(7,26,53,.08); }
+.catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(285px, 1fr)); gap: 14px; align-items: stretch; }
+.catalog-card { min-width: 0; min-height: 166px; padding: 14px; display: grid; grid-template-columns: 82px minmax(0, 1fr); gap: 14px; border: 1px solid var(--line); border-left: 4px solid var(--green); border-radius: 4px; background: #fff; }
+.catalog-cover { width: 82px; height: 118px; aspect-ratio: auto; overflow: hidden; border: 1px solid #bdc5d1; border-radius: 2px; background: var(--surface-alt); box-shadow: 3px 4px 0 rgba(7,26,53,.08); }
 .catalog-cover img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .35s ease; }
 .catalog-card:hover .catalog-cover img { transform: scale(1.025); }
 .cover-placeholder { position: relative; overflow: hidden; display: grid; place-items: center; color: #fff; background: var(--blue); }
@@ -193,13 +193,16 @@ input::placeholder, textarea::placeholder { color: #8b95a3; }
 .cover-placeholder::after { content: "VD"; position: absolute; right: -12%; bottom: -12%; color: rgba(255,255,255,.10); font-family: Georgia, serif; font-size: 7rem; font-weight: 700; line-height: 1; }
 .cover-placeholder span { position: relative; z-index: 1; font-family: "Courier New", monospace; font-size: .7rem; font-weight: 700; letter-spacing: .16em; line-height: 1.5; text-align: center; }
 .catalog-copy { min-width: 0; padding: 0; display: flex; flex: 1; flex-direction: column; }
-.catalog-copy h3 { margin: 10px 0 4px; font-family: Georgia, serif; font-size: 1.2rem; font-weight: 500; line-height: 1.2; letter-spacing: -.025em; }
+.catalog-copy h3 { display: -webkit-box; overflow: hidden; margin: 8px 0 3px; font-family: Georgia, serif; font-size: 1.05rem; font-weight: 500; line-height: 1.18; letter-spacing: -.02em; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .catalog-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--ink-soft); font-size: .72rem; }
-.catalog-author { margin-bottom: 12px; color: var(--ink-soft); font-size: .82rem; }
-.catalog-summary { display: -webkit-box; overflow: hidden; margin-bottom: 12px; color: var(--ink-soft); font-size: .8rem; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.catalog-author { overflow: hidden; margin-bottom: 8px; color: var(--ink-soft); font-size: .76rem; text-overflow: ellipsis; white-space: nowrap; }
+.catalog-summary { display: -webkit-box; overflow: hidden; margin-bottom: 8px; color: var(--ink-soft); font-size: .75rem; line-height: 1.35; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .catalog-actions { margin-top: auto; padding-top: 2px; display: flex; flex-wrap: wrap; gap: 7px; border-top: 1px solid var(--line); }
 .catalog-actions .button { margin-top: 12px; }
 .catalog-copy > .button { margin-top: auto; }
+.catalog-pagination { margin-top: 24px; padding: 12px 0; display: flex; align-items: center; justify-content: center; gap: 18px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: .82rem; }
+.catalog-pagination[hidden] { display: none; }
+.catalog-pagination span { min-width: 120px; text-align: center; }
 .reservation-catalog { margin-bottom: 42px; padding-bottom: 36px; border-bottom: 1px solid var(--line); }
 .reservation-book-search { width: min(100%, 560px); margin-bottom: 18px; background: #fff; }
 .reservation-books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
@@ -334,6 +337,8 @@ tbody tr:hover { background: #f6f8fc; }
   .catalog-copy h3 { font-size: 1.15rem; }
   .catalog-actions { display: grid; grid-template-columns: 1fr; }
   .catalog-actions .button { width: 100%; }
+  .catalog-pagination { gap: 9px; }
+  .catalog-pagination span { min-width: auto; }
   .dialog-grid { grid-template-columns: 1fr; padding: 22px; }
   .field-wide { grid-column: auto; }
   .cover-upload { grid-template-columns: 1fr; }
@@ -347,8 +352,8 @@ tbody tr:hover { background: #f6f8fc; }
   .nav-index { display: none; }
   .content { padding-inline: 16px; }
   .catalog-grid { grid-template-columns: 1fr; }
-  .catalog-card { min-height: 166px; padding: 13px; grid-template-columns: 88px minmax(0, 1fr); gap: 13px; }
-  .catalog-cover { width: 88px; height: 126px; }
+  .catalog-card { min-height: 158px; padding: 12px; grid-template-columns: 76px minmax(0, 1fr); gap: 12px; }
+  .catalog-cover { width: 76px; height: 109px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
