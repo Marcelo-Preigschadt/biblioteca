@@ -426,20 +426,43 @@ async function initPainel(current) {
   }
 }
 
-function renderBooks(books, current, activeReservations) {
+const BOOKS_PER_PAGE = 18;
+
+function renderCatalogPagination(totalPages, currentPage) {
+  const pagination = document.querySelector("#catalogPagination");
+  if (!pagination) return;
+  if (totalPages <= 1) {
+    pagination.hidden = true;
+    pagination.innerHTML = "";
+    return;
+  }
+  pagination.hidden = false;
+  pagination.innerHTML = `
+    <button class="button button-ghost button-small" type="button" data-catalog-page="${currentPage - 1}" ${currentPage === 1 ? "disabled" : ""}>← Anterior</button>
+    <span>Página <strong>${currentPage}</strong> de <strong>${totalPages}</strong></span>
+    <button class="button button-ghost button-small" type="button" data-catalog-page="${currentPage + 1}" ${currentPage === totalPages ? "disabled" : ""}>Próxima →</button>`;
+}
+
+function renderBooks(books, current, activeReservations, requestedPage = 1) {
   const search = document.querySelector("#bookSearch").value.trim().toLocaleLowerCase("pt-BR");
   const filtered = books.filter((book) =>
     [book.titulo, book.autor, book.categoria, book.ano, book.resumo]
       .filter((value) => value !== null && value !== undefined)
       .some((value) => String(value).toLocaleLowerCase("pt-BR").includes(search)),
   );
-  document.querySelector("#bookCount").textContent = `${filtered.length} título${filtered.length === 1 ? "" : "s"}`;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / BOOKS_PER_PAGE));
+  const currentPage = Math.min(Math.max(1, requestedPage), totalPages);
+  const pageBooks = filtered.slice((currentPage - 1) * BOOKS_PER_PAGE, currentPage * BOOKS_PER_PAGE);
+  document.querySelector("#bookCount").textContent = filtered.length
+    ? `${filtered.length} título${filtered.length === 1 ? "" : "s"} · ${pageBooks.length} nesta página`
+    : "0 títulos";
   const grid = document.querySelector("#booksGrid");
   if (!filtered.length) {
     grid.innerHTML = '<div class="empty-state">Nenhum livro encontrado.</div>';
-    return;
+    renderCatalogPagination(1, 1);
+    return 1;
   }
-  grid.innerHTML = filtered.map((book) => {
+  grid.innerHTML = pageBooks.map((book) => {
     const available = Math.max(0, book.estoque_total - book.quantidade_emprestada);
     const reserved = activeReservations.has(Number(book.id));
     const status = available > 0
@@ -460,6 +483,8 @@ function renderBooks(books, current, activeReservations) {
       </div>
     </article>`;
   }).join("");
+  renderCatalogPagination(totalPages, currentPage);
+  return currentPage;
 }
 
 async function fetchReaders() {
@@ -513,9 +538,22 @@ async function initAcervo(current) {
   installDialogs();
   let books = await fetchBooks();
   let activeReservations = current.canReserve ? await fetchActiveReservationBookIds(current.user.id) : new Set();
-  const render = () => renderBooks(books, current, activeReservations);
+  let catalogPage = 1;
+  const render = () => {
+    catalogPage = renderBooks(books, current, activeReservations, catalogPage);
+  };
   render();
-  document.querySelector("#bookSearch").addEventListener("input", render);
+  document.querySelector("#bookSearch").addEventListener("input", () => {
+    catalogPage = 1;
+    render();
+  });
+  document.querySelector("#catalogPagination").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-catalog-page]");
+    if (!button || button.disabled) return;
+    catalogPage = Number(button.dataset.catalogPage);
+    render();
+    document.querySelector(".catalog-toolbar").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
 
   const grid = document.querySelector("#booksGrid");
   if (current.canReserve && !current.isStaff) {
