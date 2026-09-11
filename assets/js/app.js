@@ -374,7 +374,8 @@ async function initPainel(current) {
   document.querySelector("#welcomeName").textContent = current.profile.nome.split(" ")[0];
   if (current.isStaff) {
     document.querySelector("#welcomeText").textContent = "Acompanhe reservas, circulação e situação do acervo.";
-    document.querySelector("#welcomeAction").textContent = "Gerenciar acervo";
+    document.querySelector("#welcomeAction").textContent = "Cadastrar livro";
+    document.querySelector("#welcomeAction").href = "gestao-acervo.html";
   }
   const [booksResult, reservationsResult, loansResult] = await Promise.all([
     supabase.from("livros").select("id,titulo,autor,capa_path,estoque_total,quantidade_emprestada").order("titulo"),
@@ -622,7 +623,7 @@ async function initAcervo(current) {
     bookDialog.showModal();
   };
 
-  document.querySelector("#openBookDialog").addEventListener("click", () => {
+  document.querySelector("#openBookDialog")?.addEventListener("click", () => {
     resetBookForm();
     bookDialog.showModal();
   });
@@ -765,6 +766,82 @@ async function initAcervo(current) {
     const book = books.find((item) => item.id === loanBookId);
     if (book) openLoan(book, params.get("leitor") || "");
   }
+}
+
+async function initGestaoAcervo(current) {
+  if (!current.isStaff) {
+    window.location.replace("acervo.html");
+    return;
+  }
+  const form = document.querySelector("#collectionForm");
+  const coverInput = document.querySelector("#collectionCover");
+  const coverImage = document.querySelector("#collectionCoverImage");
+  const coverEmpty = document.querySelector("#collectionCoverEmpty");
+  let previewObjectUrl = "";
+
+  const clearPreview = () => {
+    if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+    previewObjectUrl = "";
+    coverImage.hidden = true;
+    coverImage.removeAttribute("src");
+    coverEmpty.hidden = false;
+  };
+
+  coverInput.addEventListener("change", () => {
+    const file = coverInput.files[0];
+    if (!file) {
+      clearPreview();
+      return;
+    }
+    try {
+      validateCover(file);
+      if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+      previewObjectUrl = URL.createObjectURL(file);
+      coverImage.src = previewObjectUrl;
+      coverImage.hidden = false;
+      coverEmpty.hidden = true;
+    } catch (error) {
+      coverInput.value = "";
+      clearPreview();
+      showMessage(friendlyError(error));
+    }
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    clearMessage();
+    setLoading(form, true);
+    const file = coverInput.files[0];
+    let uploadedCover = null;
+    try {
+      if (file) uploadedCover = await uploadCover(file, current.user.id);
+      const payload = {
+        titulo: form.elements.titulo.value.trim(),
+        autor: form.elements.autor.value.trim(),
+        categoria: form.elements.categoria.value.trim() || null,
+        ano: form.elements.ano.value ? Number(form.elements.ano.value) : null,
+        estoque_total: Number(form.elements.estoque_total.value),
+        resumo: form.elements.resumo.value.trim() || null,
+        capa_path: uploadedCover,
+        atualizado_em: new Date().toISOString(),
+        criado_por: current.user.id,
+      };
+      const { error } = await supabase.from("livros").insert(payload);
+      if (error) throw error;
+      form.reset();
+      form.elements.estoque_total.value = 1;
+      clearPreview();
+      showMessage("Livro cadastrado com sucesso. O item já está disponível no acervo.", "success");
+      form.elements.titulo.focus();
+    } catch (error) {
+      if (uploadedCover) {
+        try { await removeCoverFile(uploadedCover); } catch { /* mantém o erro original */ }
+      }
+      showMessage(friendlyError(error));
+    } finally {
+      setLoading(form, false);
+    }
+  });
 }
 
 async function fetchReservations() {
@@ -1054,6 +1131,7 @@ const initializers = {
   cadastro: initCadastro,
   painel: () => initProtected(initPainel),
   acervo: () => initProtected(initAcervo),
+  "gestao-acervo": () => initProtected(initGestaoAcervo),
   reservas: () => initProtected(initReservas),
   emprestimos: () => initProtected(initEmprestimos),
   usuarios: () => initProtected(initUsuarios),
