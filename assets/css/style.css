@@ -171,14 +171,15 @@ input::placeholder, textarea::placeholder { color: #8b95a3; }
 .section-heading h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(2rem, 3vw, 3rem); font-weight: 400; letter-spacing: -.04em; }
 .section-heading p { margin: 7px 0 0; }
 .section-heading > a:not(.button) { padding-bottom: 3px; border-bottom: 2px solid var(--yellow); color: var(--navy); font-size: .82rem; font-weight: 900; }
-.book-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
-.book-card { min-width: 0; min-height: 185px; display: grid; grid-template-columns: 112px minmax(0, 1fr); overflow: hidden; border: 1px solid var(--line); border-radius: 3px; background: #fff; }
-.book-card-cover { min-height: 185px; background: var(--surface-alt); }
+.book-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 18px; }
+.book-card { width: 100%; min-width: 0; min-height: 158px; display: grid; grid-template-columns: 94px minmax(0, 1fr); overflow: hidden; border: 1px solid var(--line); border-radius: 3px; background: #fff; }
+.book-card-cover { width: 94px; min-height: 158px; background: var(--surface-alt); }
 .book-card-cover img { width: 100%; height: 100%; display: block; object-fit: cover; }
-.book-card-copy { min-width: 0; padding: 20px; display: flex; flex-direction: column; }
-.book-card h3 { margin: 0 0 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: Georgia, serif; font-size: 1.2rem; font-weight: 500; }
+.book-card-copy { min-width: 0; overflow: hidden; padding: 16px; display: flex; flex-direction: column; }
+.book-card h3 { display: -webkit-box; overflow: hidden; margin: 0 0 5px; font-family: Georgia, serif; font-size: 1.12rem; font-weight: 500; line-height: 1.25; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .book-card p { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-soft); font-size: .82rem; }
-.book-card footer { margin-top: auto; padding-top: 15px; display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--ink-soft); font-size: .73rem; }
+.book-card footer { min-width: 0; margin-top: auto; padding-top: 14px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; color: var(--ink-soft); font-size: .78rem; }
+.book-card footer .button { max-width: 100%; flex: 0 0 auto; white-space: nowrap; }
 .loading-state, .empty-state { grid-column: 1 / -1; padding: 48px; border: 1px solid var(--line); border-left: 6px solid var(--yellow); background: #fff; color: var(--ink-soft); text-align: center; }
 
 /* Catálogo */
@@ -205,15 +206,18 @@ input::placeholder, textarea::placeholder { color: #8b95a3; }
 .catalog-pagination span { min-width: 120px; text-align: center; }
 .reservation-catalog { margin-bottom: 42px; padding-bottom: 36px; border-bottom: 1px solid var(--line); }
 .reservation-book-search { width: min(100%, 560px); margin-bottom: 18px; background: #fff; }
-.reservation-books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
-.reservation-books-grid .book-card { min-height: 150px; grid-template-columns: 92px minmax(0, 1fr); }
-.reservation-books-grid .book-card-cover { min-height: 150px; }
+.reservation-books-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 14px; }
+.reservation-books-grid .book-card { min-height: 146px; grid-template-columns: 86px minmax(0, 1fr); }
+.reservation-books-grid .book-card-cover { width: 86px; min-height: 146px; }
 .reservation-books-grid .book-card-copy { padding: 15px; }
 .cover-upload { display: grid; grid-template-columns: 118px minmax(0, 1fr); align-items: center; gap: 18px; }
 .cover-upload > div:last-child { display: grid; justify-items: start; gap: 8px; }
 .cover-upload small { color: var(--ink-soft); font-size: .75rem; }
 .cover-preview { width: 118px; height: 160px; overflow: hidden; display: grid; place-items: center; border: 1px dashed #8994a4; border-radius: 2px; background: var(--blue-bg); color: var(--blue); font-family: "Courier New", monospace; font-size: .72rem; font-weight: 700; letter-spacing: .14em; }
 .cover-preview img { width: 100%; height: 100%; object-fit: cover; }
+.collection-form-card { max-width: 920px; padding: 28px; border: 1px solid var(--line); border-left: 6px solid var(--green); border-radius: 4px; background: #fff; }
+.collection-form-card .dialog-grid { padding: 0; }
+.collection-form-actions { margin-top: 24px; padding-top: 20px; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--line); }
 .info-card { margin-bottom: 34px; padding: 20px 22px; border: 1px solid #d7b84c; border-left: 8px solid var(--yellow); border-radius: 2px; background: #fff9df; color: #5d4b0f; }
 .info-card p { margin: 5px 0 0; font-size: .9rem; }
 
@@ -344,6 +348,9 @@ tbody tr:hover { background: #f6f8fc; }
   .cover-upload { grid-template-columns: 1fr; }
   .dialog-card > footer { padding: 17px 22px; flex-direction: column-reverse; }
   .dialog-card > footer .button { width: 100%; }
+  .collection-form-card { padding: 20px; }
+  .collection-form-actions { align-items: stretch; flex-direction: column-reverse; }
+  .collection-form-actions .button { width: 100%; }
 }
 
 @media (max-width: 460px) {
