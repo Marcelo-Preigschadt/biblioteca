@@ -20,6 +20,8 @@ const BOOK_CATEGORY_GROUPS = [
       ["Religião", "200 — Religião"],
       ["Outras Religiões", "290 — Outras Religiões"],
       ["Sociologia", "301 — Sociologia"],
+      ["Estatística", "310 — Estatística"],
+      ["Direito", "340 — Direito"],
       ["Educação", "370 — Educação"],
       ["Folclore", "390 — Folclore"],
       ["Língua Portuguesa", "469 — Língua Portuguesa"],
