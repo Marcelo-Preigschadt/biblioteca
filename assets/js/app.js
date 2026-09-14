@@ -1277,18 +1277,22 @@ function renderUsers(users) {
   document.querySelector("#userCount").textContent = `${filtered.length} usuário${filtered.length === 1 ? "" : "s"}`;
   const table = document.querySelector("#usersTable");
   if (!filtered.length) {
-    table.innerHTML = '<tr><td colspan="4" class="empty-cell">Nenhum usuário encontrado.</td></tr>';
+    table.innerHTML = '<tr><td colspan="5" class="empty-cell">Nenhum usuário encontrado.</td></tr>';
     return;
   }
   table.innerHTML = filtered.map((user) => {
-    const control = user.tipo === "admin"
+    const protectedAdmin = user.tipo === "admin";
+    const control = protectedAdmin
       ? '<span class="status admin">Administrador protegido</span>'
       : `<select class="compact-select role-select" data-user-role-id="${user.id}" aria-label="Perfil de ${escapeHtml(user.nome)}">
           <option value="aluno" ${user.tipo === "aluno" ? "selected" : ""}>Aluno</option>
           <option value="professor" ${user.tipo === "professor" ? "selected" : ""}>Professor</option>
           <option value="bibliotecaria" ${user.tipo === "bibliotecaria" ? "selected" : ""}>Bibliotecária</option>
         </select>`;
-    return `<tr><td><strong>${escapeHtml(user.nome)}</strong><br><small class="muted">Criado em ${formatDateTime(user.criado_em)}</small></td><td>${escapeHtml(user.email)}</td><td>${escapeHtml(user.turma || "—")}</td><td>${control}</td></tr>`;
+    const action = protectedAdmin
+      ? "—"
+      : `<button class="button button-danger button-small" type="button" data-delete-user="${user.id}">Excluir</button>`;
+    return `<tr><td><strong>${escapeHtml(user.nome)}</strong><br><small class="muted">Criado em ${formatDateTime(user.criado_em)}</small></td><td>${escapeHtml(user.email)}</td><td>${escapeHtml(user.turma || "—")}</td><td>${control}</td><td>${action}</td></tr>`;
   }).join("");
 }
 
@@ -1321,6 +1325,26 @@ async function initUsuarios(current) {
       showMessage(friendlyError(error));
     } finally {
       select.disabled = false;
+    }
+  });
+  document.querySelector("#usersTable").addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-delete-user]");
+    if (!button) return;
+    const user = users.find((item) => item.id === button.dataset.deleteUser);
+    if (!user || !window.confirm(`Excluir definitivamente a conta de “${user.nome}” (${user.email})?`)) return;
+    button.disabled = true;
+    clearMessage();
+    try {
+      const { error } = await supabase.rpc("excluir_usuario", {
+        p_usuario_id: button.dataset.deleteUser,
+      });
+      if (error) throw error;
+      users = users.filter((item) => item.id !== button.dataset.deleteUser);
+      render();
+      showMessage("Usuário excluído do sistema e da autenticação.", "success");
+    } catch (error) {
+      button.disabled = false;
+      showMessage(friendlyError(error));
     }
   });
 }
