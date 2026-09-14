@@ -8,6 +8,73 @@ const MAX_COVER_WIDTH = 1000;
 const MAX_COVER_HEIGHT = 1500;
 const TARGET_COVER_SIZE = 250 * 1024;
 const COVER_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const BOOK_CATEGORY_GROUPS = [
+  {
+    label: "Conhecimentos gerais e referência",
+    categories: [
+      ["Informática", "004 — Informática"],
+      ["Jornalismo e Publicidade", "070 — Jornalismo e Publicidade"],
+      ["Filosofia", "100 — Filosofia"],
+      ["Psicologia", "150 — Psicologia"],
+      ["Ética", "170 — Ética"],
+      ["Religião", "200 — Religião"],
+      ["Outras Religiões", "290 — Outras Religiões"],
+      ["Sociologia", "301 — Sociologia"],
+      ["Educação", "370 — Educação"],
+      ["Folclore", "390 — Folclore"],
+      ["Língua Portuguesa", "469 — Língua Portuguesa"],
+      ["Matemática", "510 — Matemática"],
+      ["Física", "530 — Física"],
+      ["Atlas", "912 — Atlas"],
+      ["Biografias", "920 — Biografias"],
+      ["Constituição", "Constituição"],
+      ["Dicionários", "Dicionários"],
+      ["Jogos e Esportes", "Jogos e Esportes"],
+      ["Artes, Ciências e Teatro", "Artes, Ciências e Teatro"],
+      ["História Negra no Brasil", "História Negra no Brasil"],
+    ],
+  },
+  {
+    label: "Literaturas estrangeiras",
+    categories: [
+      ["Literatura Norte-Americana", "810 — Literatura Norte-Americana"],
+      ["Literatura Inglesa", "820 — Literatura Inglesa"],
+      ["Literatura Alemã", "830 — Literatura Alemã"],
+      ["Literatura Francesa", "840 — Literatura Francesa"],
+      ["Literatura Italiana", "850 — Literatura Italiana"],
+      ["Literatura Espanhola", "860 — Literatura Espanhola"],
+      ["Literatura Portuguesa", "869 — Literatura Portuguesa"],
+      ["Outras Literaturas", "890 — Outras Literaturas"],
+    ],
+  },
+  {
+    label: "Literatura brasileira e regional",
+    categories: [
+      ["Literatura", "Literatura (geral)"],
+      ["Literatura Brasileira", "Literatura Brasileira"],
+      ["Literatura Brasileira — Romance", "Literatura Brasileira — Romance"],
+      ["Literatura Brasileira — Contos", "Literatura Brasileira — Contos"],
+      ["Literatura Brasileira — Novela", "Literatura Brasileira — Novela"],
+      ["Literatura Brasileira — Poesia", "Literatura Brasileira — Poesia"],
+      ["Literatura Brasileira — Crônicas", "Literatura Brasileira — Crônicas"],
+      ["Literatura Gaúcha", "Literatura Gaúcha"],
+      ["Literatura Infantil", "Literatura Infantil"],
+    ],
+  },
+  {
+    label: "Literatura organizada por autor",
+    categories: [
+      ["Literatura por autor — Érico Veríssimo", "Érico Veríssimo"],
+      ["Literatura por autor — José de Alencar", "José de Alencar"],
+      ["Literatura por autor — Machado de Assis", "Machado de Assis"],
+      ["Literatura por autor — Luis Fernando Verissimo", "Luis Fernando Verissimo"],
+      ["Literatura por autor — Lígia M. da Costa", "Lígia M. da Costa"],
+      ["Literatura por autor — Jorge Amado", "Jorge Amado"],
+      ["Literatura por autor — Monteiro Lobato", "Monteiro Lobato"],
+      ["Literatura por autor — Mário Quintana", "Mário Quintana"],
+    ],
+  },
+];
 const configured =
   SUPABASE_URL.startsWith("https://") &&
   !SUPABASE_URL.includes("COLE_AQUI") &&
@@ -27,6 +94,37 @@ function escapeHtml(value = "") {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function populateBookCategorySelect(select) {
+  if (!select) return;
+  select.replaceChildren(new Option("Selecione a categoria", ""));
+  BOOK_CATEGORY_GROUPS.forEach((group) => {
+    const optionGroup = document.createElement("optgroup");
+    optionGroup.label = group.label;
+    group.categories.forEach(([value, label]) => optionGroup.append(new Option(label, value)));
+    select.append(optionGroup);
+  });
+}
+
+function setBookCategoryValue(select, value = "") {
+  if (!select) return;
+  select.querySelector("[data-legacy-category]")?.remove();
+  const normalized = String(value).trim().toLocaleLowerCase("pt-BR");
+  const matchingOption = [...select.options].find(
+    (option) => option.value.toLocaleLowerCase("pt-BR") === normalized,
+  );
+  if (matchingOption) {
+    select.value = matchingOption.value;
+    return;
+  }
+  if (!value) {
+    select.value = "";
+    return;
+  }
+  const legacyOption = new Option(`${value} (categoria já cadastrada)`, value, true, true);
+  legacyOption.dataset.legacyCategory = "true";
+  select.append(legacyOption);
 }
 
 function showMessage(text, type = "error", element = document.querySelector("#pageMessage")) {
@@ -348,7 +446,7 @@ function coverMarkup(book, className = "catalog-cover") {
 async function fetchBooks() {
   const { data, error } = await supabase
     .from("livros")
-    .select("id,titulo,autor,categoria,ano,resumo,capa_path,estoque_total,quantidade_emprestada,criado_em,atualizado_em")
+    .select("id,titulo,autor,categoria,localizacao,ano,resumo,capa_path,estoque_total,quantidade_emprestada,criado_em,atualizado_em")
     .order("titulo");
   if (error) throw error;
   return data ?? [];
@@ -374,6 +472,7 @@ function compactBookCard(book, current, activeReservations) {
   return `<article class="book-card book-card-with-cover">
     ${coverMarkup(book, "book-card-cover")}
     <div class="book-card-copy"><h3>${escapeHtml(book.titulo)}</h3><p>${escapeHtml(book.autor)}</p>
+    ${book.localizacao ? `<p class="book-location">Local: ${escapeHtml(book.localizacao)}</p>` : ""}
     <footer><span>${available} ${available === 1 ? "disponível" : "disponíveis"}</span>${action}</footer></div>
   </article>`;
 }
@@ -386,7 +485,7 @@ async function initPainel(current) {
     document.querySelector("#welcomeAction").href = "gestao-acervo.html";
   }
   const [booksResult, reservationsResult, loansResult] = await Promise.all([
-    supabase.from("livros").select("id,titulo,autor,capa_path,estoque_total,quantidade_emprestada").order("titulo"),
+    supabase.from("livros").select("id,titulo,autor,categoria,localizacao,capa_path,estoque_total,quantidade_emprestada").order("titulo"),
     supabase.from("reservas").select("id", { count: "exact", head: true }).eq("status", "ativa"),
     supabase.from("emprestimos").select("id,data_devolucao,devolvido_em"),
   ]);
@@ -458,7 +557,7 @@ function renderCatalogPagination(totalPages, currentPage) {
 function renderBooks(books, current, activeReservations, requestedPage = 1) {
   const search = document.querySelector("#bookSearch").value.trim().toLocaleLowerCase("pt-BR");
   const filtered = books.filter((book) =>
-    [book.titulo, book.autor, book.categoria, book.ano, book.resumo]
+    [book.titulo, book.autor, book.categoria, book.localizacao, book.ano, book.resumo]
       .filter((value) => value !== null && value !== undefined)
       .some((value) => String(value).toLocaleLowerCase("pt-BR").includes(search)),
   );
@@ -491,6 +590,7 @@ function renderBooks(books, current, activeReservations, requestedPage = 1) {
       ${coverMarkup(book)}
       <div class="catalog-copy"><div class="catalog-meta">${status}<span>${escapeHtml(book.categoria || "Sem categoria")}</span></div>
         <h3>${escapeHtml(book.titulo)}</h3><p class="catalog-author">${escapeHtml(book.autor)}${book.ano ? ` · ${book.ano}` : ""}</p>
+        <p class="catalog-location"><strong>Local:</strong> ${escapeHtml(book.localizacao || "não informada")}</p>
         <p class="catalog-summary">${escapeHtml(book.resumo || "Resumo ainda não cadastrado.")}</p>${actions}
       </div>
     </article>`;
@@ -673,6 +773,7 @@ async function initAcervo(current) {
 
   const bookDialog = document.querySelector("#bookDialog");
   const bookForm = document.querySelector("#bookForm");
+  populateBookCategorySelect(bookForm.elements.categoria);
   const coverInput = document.querySelector("#bookCover");
   const coverImage = document.querySelector("#coverPreviewImage");
   const coverEmpty = document.querySelector("#coverPreviewEmpty");
@@ -688,6 +789,7 @@ async function initAcervo(current) {
   };
   const resetBookForm = () => {
     bookForm.reset();
+    setBookCategoryValue(bookForm.elements.categoria);
     bookForm.elements.id.value = "";
     bookForm.capa_atual.value = "";
     bookForm.estoque_total.value = 1;
@@ -702,7 +804,8 @@ async function initAcervo(current) {
     bookForm.capa_atual.value = book.capa_path || "";
     bookForm.titulo.value = book.titulo;
     bookForm.autor.value = book.autor;
-    bookForm.categoria.value = book.categoria || "";
+    setBookCategoryValue(bookForm.elements.categoria, book.categoria || "");
+    bookForm.localizacao.value = book.localizacao || "";
     bookForm.ano.value = book.ano || "";
     bookForm.estoque_total.value = book.estoque_total;
     bookForm.resumo.value = book.resumo || "";
@@ -748,6 +851,7 @@ async function initAcervo(current) {
         titulo: bookForm.titulo.value.trim(),
         autor: bookForm.autor.value.trim(),
         categoria: bookForm.categoria.value.trim() || null,
+        localizacao: bookForm.localizacao.value.trim() || null,
         ano: bookForm.ano.value ? Number(bookForm.ano.value) : null,
         estoque_total: Number(bookForm.estoque_total.value),
         resumo: bookForm.resumo.value.trim() || null,
@@ -863,6 +967,7 @@ async function initGestaoAcervo(current) {
     return;
   }
   const form = document.querySelector("#collectionForm");
+  populateBookCategorySelect(form.elements.categoria);
   const coverInput = document.querySelector("#collectionCover");
   const coverImage = document.querySelector("#collectionCoverImage");
   const coverEmpty = document.querySelector("#collectionCoverEmpty");
@@ -908,6 +1013,7 @@ async function initGestaoAcervo(current) {
         titulo: form.elements.titulo.value.trim(),
         autor: form.elements.autor.value.trim(),
         categoria: form.elements.categoria.value.trim() || null,
+        localizacao: form.elements.localizacao.value.trim() || null,
         ano: form.elements.ano.value ? Number(form.elements.ano.value) : null,
         estoque_total: Number(form.elements.estoque_total.value),
         resumo: form.elements.resumo.value.trim() || null,
@@ -1064,7 +1170,7 @@ async function initReservas(current) {
     const renderReservationBooks = () => {
       const term = searchInput.value.trim().toLocaleLowerCase("pt-BR");
       const filtered = books.filter((book) =>
-        [book.titulo, book.autor, book.categoria].filter(Boolean)
+        [book.titulo, book.autor, book.categoria, book.localizacao].filter(Boolean)
           .some((value) => String(value).toLocaleLowerCase("pt-BR").includes(term)),
       );
       booksGrid.innerHTML = filtered.length
