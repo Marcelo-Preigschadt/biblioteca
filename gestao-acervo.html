@@ -6,7 +6,7 @@
   <meta name="description" content="Cadastro de livros da Biblioteca Escolar Vicente Dutra.">
   <title>Cadastrar livro | Biblioteca Escolar</title>
   <link rel="icon" type="image/png" href="assets/img/brasao-vicente-dutra.png?v=2">
-  <link rel="stylesheet" href="assets/css/style.css?v=11">
+  <link rel="stylesheet" href="assets/css/style.css?v=12">
 </head>
 <body class="app-body" data-page="gestao-acervo">
   <div class="app-layout">
@@ -42,8 +42,9 @@
           <div class="dialog-grid">
             <label class="field field-wide"><span>Título</span><input name="titulo" maxlength="180" required></label>
             <label class="field field-wide"><span>Autor</span><input name="autor" maxlength="160" required></label>
-            <label class="field"><span>Categoria</span><input name="categoria" maxlength="80"></label>
+            <label class="field field-wide"><span>Categoria</span><select name="categoria" required><option value="">Carregando categorias...</option></select></label>
             <label class="field"><span>Ano</span><input name="ano" type="number" min="0" max="2100"></label>
+            <label class="field"><span>Localização na biblioteca</span><input name="localizacao" maxlength="120" placeholder="Ex.: Estante 3 · Prateleira B"></label>
             <label class="field field-wide"><span>Quantidade de exemplares</span><input name="estoque_total" type="number" min="1" max="9999" value="1" required></label>
             <label class="field field-wide"><span>Resumo do livro (opcional)</span><textarea name="resumo" maxlength="3000" rows="5" placeholder="Sinopse ou resumo para consulta dos leitores."></textarea></label>
             <div class="field field-wide">
@@ -59,6 +60,6 @@
       </main>
     </div>
   </div>
-  <script type="module" src="assets/js/app.js?v=11"></script>
+  <script type="module" src="assets/js/app.js?v=12"></script>
 </body>
 </html>
