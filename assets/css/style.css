@@ -179,6 +179,7 @@ input::placeholder, textarea::placeholder { color: #8b95a3; }
 .book-card-copy { min-width: 0; overflow: hidden; padding: 16px; display: flex; flex-direction: column; }
 .book-card h3 { display: -webkit-box; overflow: hidden; margin: 0 0 5px; font-family: Georgia, serif; font-size: 1.12rem; font-weight: 500; line-height: 1.25; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .book-card p { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-soft); font-size: .82rem; }
+.book-card .book-location { margin-top: 7px; color: var(--green); font-size: .73rem; font-weight: 800; }
 .book-card footer { min-width: 0; margin-top: auto; padding-top: 14px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; color: var(--ink-soft); font-size: .78rem; }
 .book-card footer .button { max-width: 100%; flex: 0 0 auto; white-space: nowrap; }
 .loading-state, .empty-state { grid-column: 1 / -1; padding: 48px; border: 1px solid var(--line); border-left: 6px solid var(--yellow); background: #fff; color: var(--ink-soft); text-align: center; }
@@ -198,6 +199,7 @@ input::placeholder, textarea::placeholder { color: #8b95a3; }
 .catalog-copy h3 { display: -webkit-box; overflow: hidden; margin: 8px 0 3px; font-family: Georgia, serif; font-size: 1.05rem; font-weight: 500; line-height: 1.18; letter-spacing: -.02em; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .catalog-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--ink-soft); font-size: .72rem; }
 .catalog-author { overflow: hidden; margin-bottom: 8px; color: var(--ink-soft); font-size: .76rem; text-overflow: ellipsis; white-space: nowrap; }
+.catalog-location { overflow: hidden; margin: 0 0 7px; color: var(--green); font-size: .72rem; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
 .catalog-summary { display: -webkit-box; overflow: hidden; margin-bottom: 8px; color: var(--ink-soft); font-size: .75rem; line-height: 1.35; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .catalog-actions { margin-top: auto; padding-top: 2px; display: flex; flex-wrap: wrap; gap: 7px; border-top: 1px solid var(--line); }
 .catalog-actions .button { margin-top: 12px; }
