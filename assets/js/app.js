@@ -180,6 +180,7 @@ function roleLabel(role) {
   return {
     admin: "Administrador",
     bibliotecaria: "Bibliotecária",
+    equipe: "Equipe da Biblioteca",
     professor: "Professor",
     aluno: "Aluno",
   }[role] ?? "Usuário";
@@ -274,7 +275,7 @@ async function requireUser() {
     user: session.user,
     profile,
     isAdmin: profile.tipo === "admin",
-    isStaff: ["bibliotecaria", "admin"].includes(profile.tipo),
+    isStaff: ["bibliotecaria", "equipe", "admin"].includes(profile.tipo),
     isReader: ["aluno", "professor"].includes(profile.tipo),
     canReserve: ["aluno", "professor", "admin"].includes(profile.tipo),
   };
@@ -1203,7 +1204,7 @@ async function initReservas(current) {
   }
 }
 
-function renderLoans(loans) {
+function renderLoans(loans, current) {
   const search = document.querySelector("#loanSearch").value.trim().toLocaleLowerCase("pt-BR");
   const filter = document.querySelector("#loanFilter").value;
   const filtered = loans.filter((loan) => {
@@ -1217,28 +1218,48 @@ function renderLoans(loans) {
     return true;
   });
   const table = document.querySelector("#loansTable");
+  const columnCount = current.isStaff ? 6 : 4;
   if (!filtered.length) {
-    table.innerHTML = '<tr><td colspan="6" class="empty-cell">Nenhum empréstimo encontrado.</td></tr>';
+    table.innerHTML = `<tr><td colspan="${columnCount}" class="empty-cell">Nenhum empréstimo encontrado.</td></tr>`;
     return;
   }
-  table.innerHTML = filtered.map((loan) => `<tr>
-    <td><div class="book-cell">${coverMarkup(loan.livro, "book-cell-cover")}<span><strong>${escapeHtml(loan.livro?.titulo || "Livro removido")}</strong><small>${escapeHtml(loan.livro?.autor || "")}</small></span></div></td>
-    <td><strong>${escapeHtml(loan.leitor?.nome || "—")}</strong><br><small class="muted">${roleLabel(loan.leitor?.tipo)}${loan.leitor?.turma ? ` · ${escapeHtml(loan.leitor.turma)}` : ""}</small></td>
-    <td>${formatDate(loan.data_emprestimo)}</td><td>${formatDate(loan.data_devolucao)}</td><td>${loanStatus(loan)}</td>
-    <td>${loan.devolvido_em ? "—" : `<button class="button button-primary button-small" type="button" data-return-loan="${loan.id}">Registrar devolução</button>`}</td>
-  </tr>`).join("");
+  table.innerHTML = filtered.map((loan) => {
+    const readerColumn = current.isStaff
+      ? `<td><strong>${escapeHtml(loan.leitor?.nome || "—")}</strong><br><small class="muted">${roleLabel(loan.leitor?.tipo)}${loan.leitor?.turma ? ` · ${escapeHtml(loan.leitor.turma)}` : ""}</small></td>`
+      : "";
+    const actionColumn = current.isStaff
+      ? `<td>${loan.devolvido_em ? "—" : `<button class="button button-primary button-small" type="button" data-return-loan="${loan.id}">Registrar devolução</button>`}</td>`
+      : "";
+    return `<tr>
+      <td><div class="book-cell">${coverMarkup(loan.livro, "book-cell-cover")}<span><strong>${escapeHtml(loan.livro?.titulo || "Livro removido")}</strong><small>${escapeHtml(loan.livro?.autor || "")}</small></span></div></td>
+      ${readerColumn}
+      <td>${formatDate(loan.data_emprestimo)}</td>
+      <td><strong>${formatDate(loan.data_devolucao)}</strong></td>
+      <td>${loanStatus(loan)}</td>
+      ${actionColumn}
+    </tr>`;
+  }).join("");
 }
 
 async function initEmprestimos(current) {
   if (!current.isStaff) {
-    window.location.replace("reservas.html");
-    return;
+    document.querySelector("#loansPageTitle").textContent = "Meus empréstimos";
+    document.querySelector("#loansHeading").textContent = "Empréstimos ativos e histórico";
+    document.querySelector("#loansDescription").textContent = "Acompanhe os livros emprestados, o prazo de entrega e possíveis atrasos.";
+    document.querySelector("#registerLoanLink").hidden = true;
+    document.querySelector("#loanSearch").placeholder = "Pesquisar por livro...";
   }
-  let loans = await fetchLoans();
-  const render = () => renderLoans(loans);
+  document.querySelectorAll("[data-loan-staff-column]").forEach((column) => {
+    column.hidden = !current.isStaff;
+  });
+
+  let loans = await fetchLoans(current.isStaff ? null : current.user.id);
+  const render = () => renderLoans(loans, current);
   render();
   document.querySelector("#loanSearch").addEventListener("input", render);
   document.querySelector("#loanFilter").addEventListener("change", render);
+
+  if (!current.isStaff) return;
   document.querySelector("#loansTable").addEventListener("click", async (event) => {
     const button = event.target.closest("[data-return-loan]");
     if (!button || !window.confirm("Confirmar a devolução deste livro?")) return;
@@ -1288,6 +1309,7 @@ function renderUsers(users) {
           <option value="aluno" ${user.tipo === "aluno" ? "selected" : ""}>Aluno</option>
           <option value="professor" ${user.tipo === "professor" ? "selected" : ""}>Professor</option>
           <option value="bibliotecaria" ${user.tipo === "bibliotecaria" ? "selected" : ""}>Bibliotecária</option>
+          <option value="equipe" ${user.tipo === "equipe" ? "selected" : ""}>Equipe da Biblioteca</option>
         </select>`;
     const action = protectedAdmin
       ? "—"
