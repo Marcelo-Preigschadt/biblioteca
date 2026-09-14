@@ -34,6 +34,7 @@ const BOOK_CATEGORY_GROUPS = [
       ["Jogos e Esportes", "Jogos e Esportes"],
       ["Artes, Ciências e Teatro", "Artes, Ciências e Teatro"],
       ["História Negra no Brasil", "História Negra no Brasil"],
+      ["Outros", "Outros"],
     ],
   },
   {
